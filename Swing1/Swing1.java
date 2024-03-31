@@ -14,7 +14,6 @@ import java.awt.*;
 public class Swing1 {
 	
 	static public JFrame f = new JFrame();
-	public static JComboBox method_selector;
 	public static JPanel method_panel = new JPanel();
 	public static boolean ipselector_is_shown = false;
 	
@@ -43,7 +42,7 @@ public class Swing1 {
 	        	if(ipselector_is_shown) {
 	        		try {
 	        			JComboBox selector = new JComboBox(get());
-	        			JLabel label = new JLabel("select your Server:");
+	        			JLabel label = new JLabel("Select your server:");
 	        			JButton button=new JButton("Join");
 	       		
 	        			f.remove(method_panel);
@@ -63,7 +62,7 @@ public class Swing1 {
 	   (new ipFinder()).execute();
 		   
 		method_panel = new JPanel();
-		JLabel wait = new JLabel("Waiting for scan results...");
+		JLabel wait = new JLabel("Waiting for Network Scan to finish...");
 		method_panel.add(wait);
 		f.add(method_panel);
 	
@@ -71,7 +70,7 @@ public class Swing1 {
 	
 	public static void spawn_manual() throws IOException {
 		method_panel = new JPanel();
-		JLabel label = new JLabel("Enter Server Address:");
+		JLabel label = new JLabel("Enter server address:");
 		JTextField ip = new JTextField(16);
 		JButton button=new JButton("Join");//creating instance of JButton  
 		
@@ -95,10 +94,10 @@ public class Swing1 {
 	}
 	
 	public static void spawn_connection_selector() throws IOException {
-		String[] connectiontypes = {"Host","Select IP","Enter Address manually"};
+		String[] connectiontypes = {"Host","Select IP","Enter address manually"}; 
 		JPanel panel = new JPanel();
-		method_selector = new JComboBox(connectiontypes);
-		JLabel label = new JLabel("select your connection type:");
+		JComboBox method_selector = new JComboBox(connectiontypes);
+		JLabel label = new JLabel("Select your connection type:");
 		panel.add(label);
 		panel.add(method_selector);
 		f.add(panel);
@@ -118,7 +117,7 @@ public class Swing1 {
 		    				ipselector_is_shown = true;
 		    				spawn_ip_selector();
 		    				break;
-		    			case "Enter Address manually":
+		    			case "Enter address manually":
 		    				ipselector_is_shown = false;
 		    				spawn_manual();
 		    				break;
@@ -177,4 +176,8 @@ public class Swing1 {
 	    ipsSet.toArray( simpleArray );
 	    return simpleArray;
     }
+
+	public static void spawn_field() {
+		
+	}
 }
