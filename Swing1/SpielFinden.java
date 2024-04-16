@@ -2,10 +2,12 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import Components.MenuBar;
+
 // Erstes Beispiel zur Verwendung von (AWT und) Swing.
 class SpielFinden {
     // Graphische Oberfläche aufbauen und anzeigen.
-    private static void start () {
+    public SpielFinden (JFrame menuFrame, boolean playAgainstComputer) {
 	// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 	// "Swing1" wird in den Titelbalken geschrieben.
 	JFrame frame = new JFrame("Schiffe versenken");
@@ -91,7 +93,11 @@ class SpielFinden {
 	JButton buttonSpielErstellen = new JButton("Neues Spiel erstellen");
 	buttonSpielErstellen.setAlignmentX(Component.CENTER_ALIGNMENT);
 	buttonSpielErstellen.addActionListener(
-	    (e) -> { System.out.println("Knopf gedrückt: Neues Spiel erstellen"); }
+	    (e) -> { 
+	    	System.out.println("Knopf gedrückt: Neues Spiel erstellen"); 
+	    	frame.setVisible(false);   // this will close current login box window
+	    	new SpielErstellen(menuFrame, playAgainstComputer);    // display windows to create game, playAgainstComputer = true
+	    	}
 	);
 	frame.add(buttonSpielErstellen);
 	
@@ -104,38 +110,19 @@ class SpielFinden {
 	// Jeder Menüpunkt ist eigentlich ein Knopf, dem wie oben
 	// eine anonyme Funktion zugeordnet werden kann.
 	// (Hier exemplarisch nur für einen Menüpunkt.)
-	JMenuBar bar = new JMenuBar();
-	{
-	    JMenu menu = new JMenu("Menü");
-	    {
-		JMenuItem item = new JMenuItem("Menü öffnen");
-		item.addActionListener(
-		    (e) -> { System.out.println("File -> Menü öffnen"); }
-		);
-		menu.add(item);
-	    }
-	    {
-		JMenuItem item = new JMenuItem("Programm beenden");
-		item.addActionListener(
-			    (e) -> { 
-			    	System.out.println("File -> Programm beenden"); 
-			    	System.exit(0);
-			    	}
-			);
-		menu.add(item);
-	    }
-	    bar.add(menu);
-	}
+	JMenuBar menuBar = new MenuBar(frame, menuFrame);
 
 	// Menüzeile zum Fenster hinzufügen.
-	frame.setJMenuBar(bar);
+	frame.setJMenuBar(menuBar);
 
 	// Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
 	// und das Fenster anzeigen (setVisible).
 	frame.pack();
 	frame.setVisible(true);
+	
     }
 
+    /*
     // Hauptprogramm.
     public static void main (String [] args) {
 	// Laut Swing-Dokumentation sollte die graphische Oberfläche
@@ -149,4 +136,6 @@ class SpielFinden {
 	    () -> { start(); }
 	);
     }
+    
+    */
 }
