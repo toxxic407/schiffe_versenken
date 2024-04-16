@@ -1,11 +1,14 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 // Erstes Beispiel zur Verwendung von (AWT und) Swing.
 class Menu {
     // Graphische Oberfläche aufbauen und anzeigen.
-    private static void start () {
+    public static void start () {
 	// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 	// "Swing1" wird in den Titelbalken geschrieben.
 	JFrame frame = new JFrame("Schiffe versenken");
@@ -43,7 +46,12 @@ class Menu {
 	JButton buttonGegenSpieler = new JButton("Gegen anderen Spieler spielen");
 	buttonGegenSpieler.setAlignmentX(Component.CENTER_ALIGNMENT);
 	buttonGegenSpieler.addActionListener(
-	    (e) -> { System.out.println("Knopf gedrückt: Gegen anderen Spieler spielen"); }
+	    (e) -> { 
+	    	System.out.println("Knopf gedrückt: Gegen anderen Spieler spielen"); 
+	    	//frame.setVisible(false);   // this will close current login box window
+	    	frame.dispose();
+	    	new SpielFinden(frame, false);    // display windows to create game, playAgainstComputer = false
+	    }
 	);
 	frame.add(buttonGegenSpieler);
 
@@ -54,7 +62,12 @@ class Menu {
 	JButton buttonGegenComputer = new JButton("Gegen den Computer spielen");
 	buttonGegenComputer.setAlignmentX(Component.CENTER_ALIGNMENT);
 	buttonGegenComputer.addActionListener(
-	    (e) -> { System.out.println("Knopf gedrückt: Gegen den Computer spielen"); }
+	    (e) -> { 
+	    	System.out.println("Knopf gedrückt: Gegen den Computer spielen"); 
+	    	frame.setVisible(false);   // this will close current login box window
+	    	new SpielErstellen(frame, true);    // display windows to create game, playAgainstComputer = true
+	    	
+	    	}
 	);
 	frame.add(buttonGegenComputer);
 
@@ -63,10 +76,15 @@ class Menu {
 	
 	// Button: Speil laden
 	// Button: Gegen den Computer Spielen
-	JButton buttonSpielLaden = new JButton("Speil laden");
+	JButton buttonSpielLaden = new JButton("Spiel laden");
 	buttonSpielLaden.setAlignmentX(Component.CENTER_ALIGNMENT);
 	buttonSpielLaden.addActionListener(
-	    (e) -> { System.out.println("Knopf gedrückt: Spiel laden"); }
+	    (e) -> { 
+	    	System.out.println("Knopf gedrückt: Spiel laden"); 
+	    	
+	    	// choose file to load game
+	    	File gameFilePath = getGameFilePath();
+	    }
 	);
 	frame.add(buttonSpielLaden);
 
@@ -87,6 +105,34 @@ class Menu {
 	// und das Fenster anzeigen (setVisible).
 	frame.pack();
 	frame.setVisible(true);
+    }
+    
+    private static File getGameFilePath() {
+    	try {
+	    	JFileChooser fileChooser = new JFileChooser();
+	    	FileNameExtensionFilter filter = new FileNameExtensionFilter("Game files (.json)", "json");
+	    	
+	    	fileChooser.setFileFilter(filter);
+	    	
+	    	fileChooser.setCurrentDirectory(new File("."));
+	    	
+	    	int result = fileChooser.showOpenDialog(null);
+	    	
+	    	
+	    	if (result == JFileChooser.APPROVE_OPTION) {
+				File selectedFile =  new File(fileChooser.getSelectedFile().getAbsolutePath());
+				System.out.println("Filepath: " + selectedFile);
+				return selectedFile;
+			}
+
+	    	
+	    	return null;
+    	}
+    	catch (Exception e) {
+    		System.out.println(e);
+    		return null;
+    	}
+    	
     }
 
     // Hauptprogramm.
