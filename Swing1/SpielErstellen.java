@@ -3,12 +3,10 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 
-import Components.MenuBar;
-
 // Erstes Beispiel zur Verwendung von (AWT und) Swing.
 class SpielErstellen {
     // Graphische Oberfläche aufbauen und anzeigen.
-    public SpielErstellen(JFrame menuFrame, boolean playAgainstComputer) {
+    private static void start () {
 	// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 	// "Swing1" wird in den Titelbalken geschrieben.
 	JFrame frame = new JFrame("Schiffe versenken");
@@ -135,10 +133,31 @@ class SpielErstellen {
 	// Jeder Menüpunkt ist eigentlich ein Knopf, dem wie oben
 	// eine anonyme Funktion zugeordnet werden kann.
 	// (Hier exemplarisch nur für einen Menüpunkt.)
-	JMenuBar menuBar = new MenuBar(frame, menuFrame);
+	JMenuBar bar = new JMenuBar();
+	{
+	    JMenu menu = new JMenu("Menü");
+	    {
+		JMenuItem item = new JMenuItem("Menü öffnen");
+		item.addActionListener(
+		    (e) -> { System.out.println("File -> Menü öffnen"); }
+		);
+		menu.add(item);
+	    }
+	    {
+		JMenuItem item = new JMenuItem("Programm beenden");
+		item.addActionListener(
+			    (e) -> { 
+			    	System.out.println("File -> Programm beenden"); 
+			    	System.exit(0);
+			    	}
+			);
+		menu.add(item);
+	    }
+	    bar.add(menu);
+	}
 
 	// Menüzeile zum Fenster hinzufügen.
-	frame.setJMenuBar(menuBar);
+	frame.setJMenuBar(bar);
 
 	// Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
 	// und das Fenster anzeigen (setVisible).
@@ -146,7 +165,6 @@ class SpielErstellen {
 	frame.setVisible(true);
     }
 
-    /*
     // Hauptprogramm.
     public static void main (String [] args) {
 	// Laut Swing-Dokumentation sollte die graphische Oberfläche
@@ -160,6 +178,4 @@ class SpielErstellen {
 	    () -> { start(); }
 	);
     }
-    
-    */
 }
