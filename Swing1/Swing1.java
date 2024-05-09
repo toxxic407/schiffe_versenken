@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.net.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -17,8 +18,14 @@ public class Swing1 {
 	public static JPanel connection_panel = new JPanel();
 	public static JPanel side_panel = new JPanel();
 	public static JPanel method_panel = new JPanel();
+	public static JPanel grid_panel = new JPanel();
+	public static int rotation_modifier = 0;
 	public static boolean ipselector_is_shown = false;
 	public static boolean turn = true;
+	public static boolean[][] field = new boolean[3][64];
+	public static boolean placement_phase = true;
+	public static int selected_button;
+	final static int port = 50000;
 	
 	public static void main(String[] args) throws IOException {
 		f.setLayout(new FlowLayout());
@@ -90,9 +97,36 @@ public class Swing1 {
 		JLabel label = new JLabel("IP: "+ InetAddress.getByAddress(ip).toString().substring(1));
 		JButton button=new JButton("Start Game");
 		
+		button.addActionListener(new ActionListener() {
+			@Override
+		    public void actionPerformed(ActionEvent e) {
+				method_panel.remove(button);
+		        start_server();
+		    }
+		});
+		
 		method_panel.add(label);
 		method_panel.add(button);
 	
+	}
+	
+	public static void start_server() {
+		class Server extends SwingWorker<Socket, Object> {
+	        @Override
+	       public Socket doInBackground() throws IOException {
+	        	ServerSocket ss = new ServerSocket(port);
+	    		System.out.println("Waiting for client connection ...");
+	    		Socket s = ss.accept();
+	        	return s;
+	       }
+
+	        @Override
+	       protected void done() {
+	        	System.out.println("Connection established.");
+	       }
+	   }
+
+	   (new Server()).execute();
 	}
 	
 	public static void spawn_connection_selector() throws IOException {
@@ -193,16 +227,35 @@ public class Swing1 {
     }
 
 	public static void spawn_field() {
-		JPanel grid_panel = new JPanel();
+		f.remove(grid_panel);
+		grid_panel = new JPanel();
 		grid_panel.setLayout(new GridLayout(8,8));
 		JButton[] button = new JButton[64];
 		for(int i = 0; i<64;i++) {
 			JButton temp = new JButton(Integer.toString(i+1));
 			temp.setPreferredSize(new Dimension(80, 80));
+			if(field[0][i]) {
+				temp.setBackground(Color.green);
+			}
+			if(field[2][i]) {
+				temp.setBackground(Color.black);
+			}
+			
 			button[i] = temp;
 			button[i].addActionListener(new ActionListener() {
 				@Override
 			    public void actionPerformed(ActionEvent e) {
+					//ship placement stuff first
+					if(placement_phase) {
+						//Get index of pressed Button
+						JButton b = (JButton) e.getSource();
+						selected_button = Integer.parseInt((b.getText())) - 1;
+						select_field();
+					}
+					
+					f.remove(grid_panel);
+					spawn_field();
+					
 			        turn = !turn;
 			        f.remove(side_panel);
 			        spawn_side_panel();
@@ -224,8 +277,64 @@ public class Swing1 {
 			turntext = new JLabel("Opponents Turn!");
 			turntext.setForeground(Color.red);
 		}
+		
+		JButton rotate = new JButton("rotate Ship");
+		rotate.addActionListener(new ActionListener() {
+			@Override
+		    public void actionPerformed(ActionEvent e) {
+		        rotation_modifier = (rotation_modifier+1)%4;
+		        select_field();
+				spawn_field();
+				
+		        f.remove(side_panel);
+		        spawn_side_panel();
+		    }
+		});
+			
+			JButton set = new JButton("Set");
+			set.addActionListener(new ActionListener() {
+				@Override
+			    public void actionPerformed(ActionEvent e) {
+			        for(int i = 0;i<64;i++) {
+			        	if(field[0][i]) {
+			        		field[2][i] = true;
+			        	}
+			        	field[0] = new boolean[64];
+			        }
+			    }
+		});
+		
 		side_panel.add(turntext);
+		side_panel.add(rotate);
+		side_panel.add(set);
 		f.add(side_panel);
 		SwingUtilities.updateComponentTreeUI(f);
+	}
+
+	public static void select_field() {
+		
+		field[0] = new boolean[64];
+		int k = selected_button;
+		for(int i = 0;i<3;i++) {
+			field[0][k] = true;
+			switch(rotation_modifier) {
+			case 0:
+				k++;
+				break;
+			case 1:
+				k=k+8;
+				break;
+			case 2:
+				k--;
+				break;
+			case 3:
+				k=k-8;
+				break;
+			default:
+				k++;
+		}
+			
+		}
+		
 	}
 }
