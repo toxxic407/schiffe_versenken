@@ -26,6 +26,7 @@ public class SpielTest {
 	private static JFrame mainFrame;
 	private static JPanel enemyPanel;
 	private static JPanel friendlyPanel;
+	private static int totalShipPartsCount;
 
 	public static void spawnEnemyField() {
 		enemyPanel.remove(enemyGridPanel);
@@ -131,47 +132,17 @@ public class SpielTest {
 		friendlyPanel.revalidate();
 		friendlyPanel.repaint();
 	}
+	
+	private static int countValueOcurrencesInArray(int[] arrayToAnalyze, int valueToFind) {
+	    int output = 0;
+	    for (int i = 0; i < arrayToAnalyze.length; i++)
+	        if (valueToFind == arrayToAnalyze[i])
+	        	output++;
+	    return output;
+	}
 
 	// Graphische Oberfläche aufbauen und anzeigen.
 	private static void startGui() {
-
-		// make friendly field have at least one ship
-		// if random number is even, the field it has one structure, if not, another
-		// structure
-		Random rand = new Random();
-
-		int n = rand.nextInt(10);
-		// add Schieff of lenght 3
-		if (n % 2 == 0) {
-			friendlyField[10] = 1;
-			friendlyField[11] = 1;
-			friendlyField[12] = 1;
-		} else {
-			friendlyField[38] = 1;
-			friendlyField[46] = 1;
-			friendlyField[54] = 1;
-		}
-		
-		// add Schief of lenght 2
-		int n2 = rand.nextInt(10);
-		// add Schieff of lenght 3
-		if (n2 % 2 == 0) {
-			friendlyField[50] = 1;
-			friendlyField[51] = 1;
-		} else {
-			friendlyField[26] = 1;
-			friendlyField[34] = 1;
-		}
-		
-		// add Schief of lenght 1
-		int n3 = rand.nextInt(10);
-		if (n3 % 2 == 0) {
-			friendlyField[0] = 1;
-
-		} else {
-			friendlyField[16] = 1;
-
-		}
 
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 		mainFrame = new JFrame(role);
@@ -214,6 +185,48 @@ public class SpielTest {
 	}
 
 	public static void main(String[] args) throws IOException {
+		
+		// make friendly field have at least one ship
+		// if random number is even, the field it has one structure, if not, another
+		// structure
+		Random rand = new Random();
+
+		int n = rand.nextInt(10);
+		// add Schieff of lenght 3
+		if (n % 2 == 0) {
+			friendlyField[10] = 1;
+			friendlyField[11] = 1;
+			friendlyField[12] = 1;
+		} else {
+			friendlyField[38] = 1;
+			friendlyField[46] = 1;
+			friendlyField[54] = 1;
+		}
+		
+		// add Schief of lenght 2
+		int n2 = rand.nextInt(10);
+		// add Schieff of lenght 3
+		if (n2 % 2 == 0) {
+			friendlyField[50] = 1;
+			friendlyField[51] = 1;
+		} else {
+			friendlyField[26] = 1;
+			friendlyField[34] = 1;
+		}
+		
+		// add Schief of lenght 1
+		int n3 = rand.nextInt(10);
+		if (n3 % 2 == 0) {
+			friendlyField[0] = 1;
+
+		} else {
+			friendlyField[16] = 1;
+
+		}
+		
+		// register total number of ship parts
+		totalShipPartsCount = countValueOcurrencesInArray(friendlyField, 1);
+		
 		// Verwendete Portnummer (vgl. Server.java).
 		final int port = 50000;
 
@@ -284,14 +297,15 @@ public class SpielTest {
 				switch (friendlyField[positionAttacked - 1]) {
 				case 0: // es gibt Wasser in indexAttacked - 1
 				{
-					attackResult = 0; // Wasser Geschossen
+					attackResult = 0; 
 					isPlayersTurn = true;
 					System.out.println(role+"'s turn now");
 					break;
 				}
 				case 1: // es gibt Schieffteil in indexAttacked - 1
 				{
-					attackResult = 1; // Schieffteil getroffen
+					attackResult = 1;
+					friendlyField[positionAttacked - 1] = 3;	// change to hit ship part
 					isPlayersTurn = false;
 					System.out.println("NOT " + role + "'s turn now");
 					break;
@@ -305,6 +319,15 @@ public class SpielTest {
 				// reload fields
 				spawnFriendlyField();
 				spawnEnemyField();
+				
+				// check if player lost: count of ships (value = 1) is 0
+				if (countValueOcurrencesInArray(friendlyField, 1) == 0) {
+					System.out.println(role + " lost.");
+					isPlayersTurn = false;
+					spawnFriendlyField();
+					spawnEnemyField();
+					JOptionPane.showMessageDialog(mainFrame, "You lost :(");
+				}
 
 			}
 
@@ -331,10 +354,20 @@ public class SpielTest {
 				}
 
 				}
-
+				
 				// reload fields
 				spawnFriendlyField();
 				spawnEnemyField();
+				
+				// check if player won: count of hit ships (value = 2) is totalShipPartsCount
+				if (countValueOcurrencesInArray(enemyField, 2) == totalShipPartsCount) {
+					System.out.println(role + " won.");
+					isPlayersTurn = false;
+					spawnFriendlyField();
+					spawnEnemyField();
+					JOptionPane.showMessageDialog(mainFrame, "You won! :)");
+				}
+
 			}
 
 			if (line == null)
