@@ -71,7 +71,7 @@ public class SpielTest {
 
 					lastPositionAttacked = index; // save last attacked index
 
-					System.out.println(String.format("sent: shot %d%n", index + 1));
+					//System.out.println(String.format("sent: shot %d%n", index + 1));
 
 					// send attack
 					out.write(String.format("shot %d%n", index + 1));
@@ -261,6 +261,9 @@ public class SpielTest {
 			isPlayersTurn = true; // Client starts playing
 
 			s = new Socket(args[0], port);
+			
+			System.out.println();
+			System.out.println();
 		}
 		System.out.println("Connection established.");
 
@@ -299,7 +302,7 @@ public class SpielTest {
 				{
 					attackResult = 0; 
 					isPlayersTurn = true;
-					System.out.println(role+"'s turn now");
+					//System.out.println(role+"'s turn now");
 					break;
 				}
 				case 1: // es gibt Schieffteil in indexAttacked - 1
@@ -307,11 +310,12 @@ public class SpielTest {
 					attackResult = 1;
 					friendlyField[positionAttacked - 1] = 3;	// change to hit ship part
 					isPlayersTurn = false;
-					System.out.println("NOT " + role + "'s turn now");
+					//System.out.println("NOT " + role + "'s turn now");
 					break;
 				}
 
 				}
+				
 				// send answer
 				out.write(String.format("answer %d%n", attackResult));
 				out.flush();
@@ -322,7 +326,7 @@ public class SpielTest {
 				
 				// check if player lost: count of ships (value = 1) is 0
 				if (countValueOcurrencesInArray(friendlyField, 1) == 0) {
-					System.out.println(role + " lost.");
+					//System.out.println(role + " lost.");
 					isPlayersTurn = false;
 					spawnFriendlyField();
 					spawnEnemyField();
@@ -333,6 +337,8 @@ public class SpielTest {
 
 			else if (responseList[0].equals("answer")) // get attack answer and process it
 			{
+				
+				
 
 				int attackAnswerNumber = Integer.parseInt(responseList[1]);
 
@@ -342,14 +348,17 @@ public class SpielTest {
 				{
 					enemyField[lastPositionAttacked] = 1;
 					isPlayersTurn = false;
-					System.out.println("NOT " + role + "'s turn anymore");
+					//System.out.println("NOT " + role + "'s turn anymore");
+					// send answer "pass"
+					out.write(String.format("pass %n"));
+					out.flush();
 					break;
 				}
 				case 1: // geschossen und Schief getroffen
 				{
 					enemyField[lastPositionAttacked] = 2;
 					isPlayersTurn = true;
-					System.out.println("Still " +role+"'s turn");
+					//System.out.println("Still " +role+"'s turn");
 					break;
 				}
 
@@ -361,7 +370,7 @@ public class SpielTest {
 				
 				// check if player won: count of hit ships (value = 2) is totalShipPartsCount
 				if (countValueOcurrencesInArray(enemyField, 2) == totalShipPartsCount) {
-					System.out.println(role + " won.");
+					//System.out.println(role + " won.");
 					isPlayersTurn = false;
 					spawnFriendlyField();
 					spawnEnemyField();
