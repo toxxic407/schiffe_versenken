@@ -5,30 +5,36 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
-public class SpielTest {
-	private static String role; // Rolle: Server oder Client.
-	private static BufferedReader in; // Verpackung des Socket-Eingabestroms.
-	private static Writer out; // Verpackung des Socket-Ausgabestroms.
-	private static boolean isPlayersTurn;
-	private static int lastPositionAttacked;
+public class SpielTestNew {
+	private String role; // Rolle: Server oder Client.
+	private BufferedReader in; // Verpackung des Socket-Eingabestroms.
+	private Writer out; // Verpackung des Socket-Ausgabestroms.
+	private  boolean isPlayersTurn;
+	private  int lastPositionAttacked;
 	/*
 	 * Werte für enemyField: 0 = unbekant, 1 = geschossen und Wasser gefunden, 2 =
 	 * geschossen und Schief getroffen
 	 */
-	private static int[] enemyField = new int[64];
+	private  int[] enemyField = new int[64];
 	/*
 	 * Werte für friendlyField: 0 = Wasser, 1 = Schiefteil intakt, 2 = Wasser
 	 * Geschossen, 3 = Schiefteil getroffen
 	 */
-	private static int[] friendlyField = new int[64];
-	private static JPanel enemyGridPanel = new JPanel();
-	private static JPanel friendlyGridPanel = new JPanel();
-	private static JFrame mainFrame;
-	private static JPanel enemyPanel;
-	private static JPanel friendlyPanel;
-	private static int totalShipPartsCount;
+	private  int[] friendlyField = new int[64];
+	private  JPanel enemyGridPanel = new JPanel();
+	private  JPanel friendlyGridPanel = new JPanel();
+	private  JFrame mainFrame;
+	private  JPanel enemyPanel;
+	private  JPanel friendlyPanel;
+	private  int totalShipPartsCount;
+	private String ipServer;
+	
+	public SpielTestNew(String ipServer) {
+		this.ipServer = ipServer;
+	}
+	
 
-	public static void spawnEnemyField() {
+	public void spawnEnemyField() {
 		enemyPanel.remove(enemyGridPanel);
 		enemyGridPanel.removeAll();
 		enemyGridPanel = new JPanel();
@@ -92,7 +98,7 @@ public class SpielTest {
 		enemyPanel.repaint();
 	}
 
-	public static void spawnFriendlyField() {
+	public void spawnFriendlyField() {
 		friendlyPanel.remove(friendlyGridPanel);
 		friendlyGridPanel.removeAll();
 		friendlyGridPanel = new JPanel();
@@ -133,7 +139,7 @@ public class SpielTest {
 		friendlyPanel.repaint();
 	}
 	
-	private static int countValueOcurrencesInArray(int[] arrayToAnalyze, int valueToFind) {
+	private  int countValueOcurrencesInArray(int[] arrayToAnalyze, int valueToFind) {
 	    int output = 0;
 	    for (int i = 0; i < arrayToAnalyze.length; i++)
 	        if (valueToFind == arrayToAnalyze[i])
@@ -142,7 +148,7 @@ public class SpielTest {
 	}
 
 	// Graphische Oberfläche aufbauen und anzeigen.
-	private static void startGui() {
+	private  void startGui() {
 
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 		mainFrame = new JFrame(role);
@@ -184,7 +190,7 @@ public class SpielTest {
 
 	}
 
-	public static void main(String[] args) throws IOException {
+	public void start() throws IOException {
 		
 		// make friendly field have at least one ship
 		// if random number is even, the field it has one structure, if not, another
@@ -232,7 +238,7 @@ public class SpielTest {
 
 		// Socketverbindung zur anderen "Seite" herstellen.
 		Socket s;
-		if (args.length == 0) {
+		if (this.ipServer.length() == 0) {
 			role = "Server";
 
 			isPlayersTurn = false; // Server does not start playing
@@ -260,7 +266,7 @@ public class SpielTest {
 			role = "Client";
 			isPlayersTurn = true; // Client starts playing
 
-			s = new Socket(args[0], port);
+			s = new Socket(this.ipServer, port);
 			
 			System.out.println();
 			System.out.println();
@@ -273,9 +279,9 @@ public class SpielTest {
 		out = new OutputStreamWriter(s.getOutputStream());
 
 		// Graphische Oberfläche aufbauen.
-		SwingUtilities.invokeLater(() -> {
-			startGui();
-		});
+
+		startGui();
+
 
 		// Netzwerknachrichten lesen und verarbeiten.
 		// Da die graphische Oberfläche von einem separaten Thread verwaltet
@@ -391,6 +397,17 @@ public class SpielTest {
 		System.out.println("Connection closed.");
 		System.exit(0);
 
+	}
+	
+	public static void main(String[] args) {
+		SpielTestNew spielTestNew = new SpielTestNew("");
+		
+		try {
+			spielTestNew.start();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
