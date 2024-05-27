@@ -185,6 +185,8 @@ public class SpielTestNew2 {
 
 	// Graphische Oberfläche aufbauen und anzeigen.
 	private void startGui() {
+		
+		/*
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 		this.mainFrame = new JFrame(role);
 
@@ -222,6 +224,54 @@ public class SpielTestNew2 {
 		// und das Fenster anzeigen (setVisible).
 		this.mainFrame.pack();
 		this.mainFrame.setVisible(true);
+		
+		*/
+		
+		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
+	    this.mainFrame = new JFrame(role);
+
+	    // Beim Schließen des Fensters (z. B. durch Drücken des
+	    // X-Knopfs in Windows) soll das Programm beendet werden.
+	    this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+	    // Der Inhalt des Fensters soll von einem BoxLayout-Manager
+	    // verwaltet werden, der seine Bestandteile vertikal (von
+	    // oben nach unten) anordnet.
+	    this.mainFrame.setContentPane(Box.createVerticalBox());
+
+	    // Dehnbaren Zwischenraum am oberen Rand hinzufügen.
+	    this.mainFrame.add(Box.createGlue());
+
+	    // Create a panel with GridLayout to arrange enemy and friendly fields horizontally
+	    JPanel fieldsPanel = new JPanel(new GridLayout(1, 2));
+
+	    // Enemy field
+	    JPanel enemyContainer = new JPanel(new BorderLayout());
+	    JLabel enemyLabel = new JLabel("Gegnerisches Spielfeld", JLabel.CENTER);
+	    enemyPanel = new JPanel();
+	    spawnEnemyField();
+	    enemyContainer.add(enemyLabel, BorderLayout.NORTH);
+	    enemyContainer.add(enemyPanel, BorderLayout.CENTER);
+
+	    // Friendly field
+	    JPanel friendlyContainer = new JPanel(new BorderLayout());
+	    JLabel friendlyLabel = new JLabel("Ihres Spielfeld", JLabel.CENTER);
+	    friendlyPanel = new JPanel();
+	    spawnFriendlyField();
+	    friendlyContainer.add(friendlyLabel, BorderLayout.NORTH);
+	    friendlyContainer.add(friendlyPanel, BorderLayout.CENTER);
+
+	    // Add both fields to the fieldsPanel
+	    fieldsPanel.add(enemyContainer);
+	    fieldsPanel.add(friendlyContainer);
+
+	    // Add the fieldsPanel to the main frame
+	    this.mainFrame.add(fieldsPanel);
+
+	    // Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
+	    // und das Fenster anzeigen (setVisible).
+	    this.mainFrame.pack();
+	    this.mainFrame.setVisible(true);
 	}
 
 	private void refreshGui() {
@@ -265,6 +315,9 @@ public class SpielTestNew2 {
 			startGui();
 		});
 		
+		
+		// inform the user that the field will be activated when the other player is ready
+		JOptionPane.showMessageDialog(mainFrame, "Das Spielfeld wird aktiviert, wenn der andere Spieler bereit ist.");
 		
 		// register total number of ship parts
 		totalShipPartsCount = countValueOcurrencesInArray(friendlyField, 1);
@@ -394,6 +447,7 @@ public class SpielTestNew2 {
 		}
 
 		System.out.println("Both players are ready");
+		JOptionPane.showMessageDialog(mainFrame, "Der andere Spieler ist bereit.");
 		
 		/*
 		while (true) {
