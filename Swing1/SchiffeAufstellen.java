@@ -19,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import Components.MenuBar;
 
@@ -41,6 +42,34 @@ public class SchiffeAufstellen {
 	private int startXShipToRelocate;
 	private int startYShipToRelocate;
 	private Socket s;
+
+	public SchiffeAufstellen(String role, JFrame menuFrame, boolean playAgainstComputer, boolean botWillPlay,
+			int fieldSize, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
+			int anzahlSchiffeGroesse2) {
+		// set instance variables
+		this.role = role;
+
+		if (role.equals("Server")) {
+			this.menuFrame = menuFrame;
+			this.playAgainstComputer = playAgainstComputer;
+			this.botWillPlay = botWillPlay;
+			this.fieldSize = fieldSize;
+
+			this.field = new int[fieldSize][fieldSize];
+			this.anzahlSchiffeGroesse5 = anzahlSchiffeGroesse5;
+			this.anzahlSchiffeGroesse4 = anzahlSchiffeGroesse4;
+			this.anzahlSchiffeGroesse3 = anzahlSchiffeGroesse3;
+			this.anzahlSchiffeGroesse2 = anzahlSchiffeGroesse2;
+
+		} else {
+			// TODO when role is Client, create socket connection and get information from
+			// Server
+
+		}
+
+		showUI();
+
+	}
 
 	private void spawnField() {
 		fieldPanel.remove(fieldGridPanel);
@@ -266,33 +295,6 @@ public class SchiffeAufstellen {
 		return row >= 0 && row < fieldSize && col >= 0 && col < fieldSize;
 	}
 
-	public SchiffeAufstellen(String role, JFrame menuFrame, boolean playAgainstComputer, boolean botWillPlay,
-			int fieldSize, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
-			int anzahlSchiffeGroesse2) {
-		// set instance variables
-		this.role = role;
-
-		if (role.equals("Server")) {
-			this.menuFrame = menuFrame;
-			this.playAgainstComputer = playAgainstComputer;
-			this.botWillPlay = botWillPlay;
-			this.fieldSize = fieldSize;
-
-			this.field = new int[fieldSize][fieldSize];
-			this.anzahlSchiffeGroesse5 = anzahlSchiffeGroesse5;
-			this.anzahlSchiffeGroesse4 = anzahlSchiffeGroesse4;
-			this.anzahlSchiffeGroesse3 = anzahlSchiffeGroesse3;
-			this.anzahlSchiffeGroesse2 = anzahlSchiffeGroesse2;
-
-		} else {
-			// when role is Client, create socket connection and get information from Server
-
-		}
-
-		showUI();
-
-	}
-
 	private void showUI() {
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 		// "Swing1" wird in den Titelbalken geschrieben.
@@ -341,8 +343,14 @@ public class SchiffeAufstellen {
 				if (!this.botWillPlay) {
 					if (this.role == "Server") {
 
-						new Player(this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
-								this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2).start();
+						Player player = new Player(this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
+								this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
+						player.start();
+
+						new Thread(() -> {
+							new PlayerBotNoUI(this.field.length, anzahlSchiffeGroesse5, anzahlSchiffeGroesse4,
+									anzahlSchiffeGroesse3, anzahlSchiffeGroesse2).start();
+						}).start();
 
 					} else if (this.role == "Client") {
 						// TODO when player is Client and NOT bot

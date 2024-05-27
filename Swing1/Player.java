@@ -35,7 +35,7 @@ public class Player {
 	private boolean isClientFieldSizeDone = false;
 	private boolean areClientFieldShipsDone = false;
 	private boolean isOpponentReady = false;
-	private Socket s;
+	public Socket s;
 	private int attacksSent = 0;
 
 	public Player(int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
@@ -73,6 +73,14 @@ public class Player {
 		System.out.println(Arrays.deepToString(friendlyField));
 	}
 
+	public boolean shouldIWaitForSocket() {
+		if (this.role.equals("Server") && this.s == null) {
+			return true;
+		}
+		
+		return false;
+	}
+	
 	private void spawnEnemyField() {
 		enemyPanel.remove(enemyGridPanel);
 		enemyGridPanel.removeAll();

@@ -32,8 +32,8 @@ public class PlayerBotNoUI {
 	private boolean isOpponentReady = false;
 	private Socket s;
 
-	public PlayerBotNoUI(int fieldSize, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4,
-			int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
+	public PlayerBotNoUI(int fieldSize, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
+			int anzahlSchiffeGroesse2) {
 		this.fieldSize = fieldSize;
 		friendlyField = new int[fieldSize][fieldSize];
 		enemyField = new int[fieldSize][fieldSize];
@@ -257,9 +257,19 @@ public class PlayerBotNoUI {
 	private void manageSocketConnection() throws IOException {
 		// Verwendete Portnummer (vgl. Server.java).
 		final int port = 50000;
-
-		Socket s = new Socket("localhost", port);
-		this.s = s;
+		
+		boolean isConnectionSuccesfull = false;
+		
+		while (!isConnectionSuccesfull) {
+			try {
+				Socket s = new Socket("localhost", port);
+				this.s = s;
+				isConnectionSuccesfull = true;
+			} catch (Exception e) {
+				continue;
+			}
+			
+		}
 
 		System.out.println("Connection established.");
 
@@ -268,7 +278,7 @@ public class PlayerBotNoUI {
 		this.in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		this.out = new OutputStreamWriter(s.getOutputStream());
 	}
-	
+
 	private void managePreparationBeforeBattle() throws IOException {
 		// Preparation before battle
 		// get field size
@@ -318,12 +328,12 @@ public class PlayerBotNoUI {
 
 		// place ships in random positions
 		placeAllShips();
-		
+
 		// register total number of ship parts
 		this.totalShipPartsCount = countValueOcurrencesInArray(friendlyField, 1);
-		
-		System.out.println("countValueOcurrencesInArray(enemyField, 1) = " + countValueOcurrencesInArray(friendlyField, 1));
 
+		System.out.println(
+				"countValueOcurrencesInArray(enemyField, 1) = " + countValueOcurrencesInArray(friendlyField, 1));
 
 		// wait until server is ready
 		while (!isOpponentReady) {
@@ -341,7 +351,7 @@ public class PlayerBotNoUI {
 
 		}
 	}
-	
+
 	private void markDestroyedShip(int x, int y) {
 		// get basic information about the ship
 		int[] shipInfo = getShipInfo(x, y);
@@ -365,7 +375,7 @@ public class PlayerBotNoUI {
 			}
 		}
 	}
-	
+
 	private int[] getEnemyShipInfo(int x, int y) {
 		int size = 0;
 		boolean vertical = false;
@@ -399,7 +409,7 @@ public class PlayerBotNoUI {
 		return new int[] { size, vertical ? 1 : 0, startX, startY };
 
 	}
-	
+
 	private void markDestroyedEnemyShip(int x, int y) {
 		// get basic information about the ship
 		int[] enemyShipInfo = getEnemyShipInfo(x, y);
@@ -425,149 +435,154 @@ public class PlayerBotNoUI {
 		System.out.println(Arrays.deepToString(enemyField));
 	}
 
-	
 	private void manageBattle() throws IOException {
 		// Netzwerknachrichten lesen und verarbeiten.
-				// Da die graphische Oberfläche von einem separaten Thread verwaltet
-				// wird, kann man hier unabhängig davon auf Nachrichten warten.
-				// Manipulationen an der Oberfläche sollten aber mittels invokeLater
-				// (oder invokeAndWait) ausgeführt werden.
-				while (true) {
-					String line = this.in.readLine(); // read line from socket
-					System.out.println("received: " + line);
-					String[] responseList = line.split(" "); // split line based on whitespace
+		// Da die graphische Oberfläche von einem separaten Thread verwaltet
+		// wird, kann man hier unabhängig davon auf Nachrichten warten.
+		// Manipulationen an der Oberfläche sollten aber mittels invokeLater
+		// (oder invokeAndWait) ausgeführt werden.
+		while (true) {
+			String line = this.in.readLine(); // read line from socket
+			System.out.println("received: " + line);
+			String[] responseList = line.split(" "); // split line based on whitespace
 
-					// get attack and answer it
+			// get attack and answer it
 
-					// player is receiving an attack
-					if (responseList[0].equals("shot")) {
-						// process attack
-						int positionAttackedRow = Integer.parseInt(responseList[1]);
-						int positionAttackedColumn = Integer.parseInt(responseList[2]);
-						int attackResult = -1;
+			// player is receiving an attack
+			if (responseList[0].equals("shot")) {
+				// process attack
+				int positionAttackedRow = Integer.parseInt(responseList[1]);
+				int positionAttackedColumn = Integer.parseInt(responseList[2]);
+				int attackResult = -1;
 
-						// prepare answer according to the content of the attacked position
-						switch (friendlyField[positionAttackedRow][positionAttackedColumn]) {
-						case 0: // es gibt Wasser in indexAttacked - 1
-						{
-							attackResult = 0;
-							friendlyField[positionAttackedRow][positionAttackedColumn] = 2;
-							isPlayersTurn = true;
-							// System.out.println(role+"'s turn now");
-							break;
-						}
-						case 1: // es gibt Schieffteil in indexAttacked - 1
-						{
-							attackResult = 1;
-							friendlyField[positionAttackedRow][positionAttackedColumn] = 3; // change to hit ship part
-							isPlayersTurn = false;
-							// System.out.println("NOT " + role + "'s turn now");
-
-							boolean isAttackedShipDestroyed = isShipCompletelyDestroyed(positionAttackedRow,
-									positionAttackedColumn);
-							if (isAttackedShipDestroyed) {
-								System.out.println("ship is completely destroyed");
-								attackResult = 2;
-								markDestroyedShip(positionAttackedRow, positionAttackedColumn);
-							}
-
-							break;
-						}
-
-						}
-
-						// send answer
-						// System.out.println("sent: " + String.format("answer %d%n", attackResult));
-						out.write(String.format("answer %d%n", attackResult));
-						out.flush();
-
-						// check if player lost: count of ships (value = 1) is 0
-						if (countValueOcurrencesInArray(friendlyField, 1) == 0) {
-							System.out.println("lost.");
-							isPlayersTurn = false;
-
-						} else if (isPlayersTurn) // if player did not lose and is its turn, attack
-						{
-							attack();
-						}
-
-					}
-
-					else if (responseList[0].equals("answer")) // get attack answer and process it
-					{
-
-						int attackAnswerNumber = Integer.parseInt(responseList[1]);
-
-						switch (attackAnswerNumber) {
-						case 0: // Wasser geschossen
-						{
-							enemyField[lastPositionAttacked[0]][lastPositionAttacked[1]] = 1;
-							isPlayersTurn = false;
-							// System.out.println("NOT " + role + "'s turn anymore");
-							// send answer "pass"
-							out.write(String.format("pass %n"));
-							out.flush();
-							break;
-						}
-						case 1: // geschossen und Schief getroffen
-						{
-							enemyField[lastPositionAttacked[0]][lastPositionAttacked[1]] = 2;
-							isPlayersTurn = true;
-							// System.out.println("Still " +role+"'s turn");
-							break;
-						}
-						case 2:
-							// Schiff gesunken
-							{
-								enemyField[lastPositionAttacked[0]][lastPositionAttacked[1]] = 2;
-								isPlayersTurn = true;
-
-								markDestroyedEnemyShip(lastPositionAttacked[0], lastPositionAttacked[1]);
-
-								break;
-							}
-						}
-
-						// check if player won: count of hit ships (value = 2) is totalShipPartsCount
-						System.out.println("countValueOcurrencesInArray(enemyField, 3) = " + countValueOcurrencesInArray(enemyField, 3));
-						System.out.println("totalShipPartsCount = " + totalShipPartsCount);
-						if (countValueOcurrencesInArray(enemyField, 3) == totalShipPartsCount) {
-							System.out.println("won.");
-							isPlayersTurn = false;
-
-						} else if (isPlayersTurn) // if player did not win and is its turn, continue attack
-						{
-							attack();
-						}
-
-					}
-
-					if (line == null)
-						break;
-					/*
-					 * SwingUtilities.invokeLater( () -> { button.setEnabled(true); } );
-					 */
+				// prepare answer according to the content of the attacked position
+				switch (friendlyField[positionAttackedRow][positionAttackedColumn]) {
+				case 0: // es gibt Wasser in indexAttacked - 1
+				{
+					attackResult = 0;
+					friendlyField[positionAttackedRow][positionAttackedColumn] = 2;
+					isPlayersTurn = true;
+					// System.out.println(role+"'s turn now");
+					break;
 				}
+				case 1: // es gibt Schieffteil in indexAttacked - 1
+				{
+					attackResult = 1;
+					friendlyField[positionAttackedRow][positionAttackedColumn] = 3; // change to hit ship part
+					isPlayersTurn = false;
+					// System.out.println("NOT " + role + "'s turn now");
+
+					boolean isAttackedShipDestroyed = isShipCompletelyDestroyed(positionAttackedRow,
+							positionAttackedColumn);
+					if (isAttackedShipDestroyed) {
+						System.out.println("ship is completely destroyed");
+						attackResult = 2;
+						markDestroyedShip(positionAttackedRow, positionAttackedColumn);
+					}
+
+					break;
+				}
+
+				}
+
+				// send answer
+				// System.out.println("sent: " + String.format("answer %d%n", attackResult));
+				out.write(String.format("answer %d%n", attackResult));
+				out.flush();
+
+				// check if player lost: count of ships (value = 1) is 0
+				if (countValueOcurrencesInArray(friendlyField, 1) == 0) {
+					System.out.println("lost.");
+					isPlayersTurn = false;
+
+				} else if (isPlayersTurn) // if player did not lose and is its turn, attack
+				{
+					attack();
+				}
+
+			}
+
+			else if (responseList[0].equals("answer")) // get attack answer and process it
+			{
+
+				int attackAnswerNumber = Integer.parseInt(responseList[1]);
+
+				switch (attackAnswerNumber) {
+				case 0: // Wasser geschossen
+				{
+					enemyField[lastPositionAttacked[0]][lastPositionAttacked[1]] = 1;
+					isPlayersTurn = false;
+					// System.out.println("NOT " + role + "'s turn anymore");
+					// send answer "pass"
+					out.write(String.format("pass %n"));
+					out.flush();
+					break;
+				}
+				case 1: // geschossen und Schief getroffen
+				{
+					enemyField[lastPositionAttacked[0]][lastPositionAttacked[1]] = 2;
+					isPlayersTurn = true;
+					// System.out.println("Still " +role+"'s turn");
+					break;
+				}
+				case 2:
+				// Schiff gesunken
+				{
+					enemyField[lastPositionAttacked[0]][lastPositionAttacked[1]] = 2;
+					isPlayersTurn = true;
+
+					markDestroyedEnemyShip(lastPositionAttacked[0], lastPositionAttacked[1]);
+
+					break;
+				}
+				}
+
+				// check if player won: count of hit ships (value = 2) is totalShipPartsCount
+				System.out.println(
+						"countValueOcurrencesInArray(enemyField, 3) = " + countValueOcurrencesInArray(enemyField, 3));
+				System.out.println("totalShipPartsCount = " + totalShipPartsCount);
+				if (countValueOcurrencesInArray(enemyField, 3) == totalShipPartsCount) {
+					System.out.println("won.");
+					isPlayersTurn = false;
+
+				} else if (isPlayersTurn) // if player did not win and is its turn, continue attack
+				{
+					attack();
+				}
+
+			}
+
+			if (line == null)
+				break;
+			/*
+			 * SwingUtilities.invokeLater( () -> { button.setEnabled(true); } );
+			 */
+		}
 	}
 
-	public void start() throws IOException {
+	public void start() {
+		try {
+			indexToAttackNext = new int[] { 0, 0 };
 
-		indexToAttackNext = new int[] { 0, 0 };
+			// role is always Client when the player is Computer with no UI. Server is
+			// localhost
+			isPlayersTurn = false; // Server starts playing
 
-		// role is always Client when the player is Computer with no UI. Server is
-		// localhost
-		isPlayersTurn = false; // Server starts playing
+			manageSocketConnection();
 
-		manageSocketConnection();
-		
-		managePreparationBeforeBattle();
-		
-		manageBattle();		
+			managePreparationBeforeBattle();
 
-		// EOF ins Socket "schreiben" und das Programm explizit beenden
-		// (weil es sonst weiterlaufen würde, bis der Benutzer das Hauptfenster
-		// schließt).
-		s.shutdownOutput();
+			manageBattle();
+
+			// EOF ins Socket "schreiben" und das Programm explizit beenden
+			// (weil es sonst weiterlaufen würde, bis der Benutzer das Hauptfenster
+			// schließt).
+
+			s.shutdownOutput();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println("Connection closed.");
 		System.exit(0);
 
