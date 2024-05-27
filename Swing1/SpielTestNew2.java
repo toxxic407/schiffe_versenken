@@ -13,12 +13,12 @@ public class SpielTestNew2 {
 	private int[] lastPositionAttacked = new int[2];
 	/*
 	 * Werte für enemyField: 0 = unbekant, 1 = geschossen und Wasser gefunden, 2 =
-	 * geschossen und Schief getroffen
+	 * geschossen und Schief getroffen, 3 = Schiff destroyed (Treffer-versenkt)
 	 */
 	private int[][] enemyField;
 	/*
 	 * Werte für friendlyField: 0 = Wasser, 1 = Schiefteil intakt, 2 = Wasser
-	 * Geschossen, 3 = Schiefteil getroffen
+	 * Geschossen, 3 = Schiefteil getroffen, 4 = Schiff destroyed 
 	 */
 	private int[][] friendlyField;
 	private int anzahlSchiffeGroesse5 = 0;
@@ -97,7 +97,7 @@ public class SpielTestNew2 {
 				}
 				if (enemyField[row][column] == 2) {
 					// getroffen
-					button.setBackground(Color.red);
+					button.setBackground(Color.orange);
 				}
 
 				// add action listener to send attacke
@@ -448,19 +448,6 @@ public class SpielTestNew2 {
 
 		System.out.println("Both players are ready");
 		JOptionPane.showMessageDialog(mainFrame, "Der andere Spieler ist bereit.");
-		
-		/*
-		while (true) {
-			String line = in.readLine(); // read line from socket
-			System.out.println("received: " + line);
-
-		}
-		*/
-		
-		
-		
-
-		// refreshGui();
 
 		// Netzwerknachrichten lesen und verarbeiten. // Da die graphische Oberfläche
 		// von einem separaten Thread verwaltet // wird, kann man hier unabhängig davon
@@ -468,15 +455,6 @@ public class SpielTestNew2 {
 		// mittels invokeLater // (oder invokeAndWait) ausgeführt werden.
 		
 		while (true) {
-			
-			// if server did not attack yet, skip this iteration
-			
-			//if (this.role == "Server" && this.attacksSent < 1) {
-			//	System.out.println("Waiting for first attack");
-			//	continue;
-			//}
-			//
-			
 			
 			
 			String line = in.readLine(); // read line from socket
@@ -490,7 +468,7 @@ public class SpielTestNew2 {
 				// process attack
 				int positionAttackedRow = Integer.parseInt(responseList[1]);
 				int positionAttackedColumn = Integer.parseInt(responseList[2]);
-				int attackResult = -1; // TODO attackResult = 2
+				int attackResult = -1;
 
 				// prepare answer according to the content of the attacked position
 				switch (friendlyField[positionAttackedRow][positionAttackedColumn]) {
@@ -498,6 +476,7 @@ public class SpielTestNew2 {
 				// es gibt Wasser in indexAttacked - 1
 				{
 					attackResult = 0;
+					friendlyField[positionAttackedRow][positionAttackedColumn] = 2;		// change to hit water
 					isPlayersTurn = true; //
 					System.out.println(role + "'s turn now");
 					break;
