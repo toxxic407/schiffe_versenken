@@ -5,7 +5,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
-public class SpielTestNew2 {
+public class Player {
 	private String role; // Rolle: Server oder Client.
 	private BufferedReader in; // Verpackung des Socket-Eingabestroms.
 	private Writer out; // Verpackung des Socket-Ausgabestroms.
@@ -32,14 +32,13 @@ public class SpielTestNew2 {
 	private JPanel enemyPanel;
 	private JPanel friendlyPanel;
 	private int totalShipPartsCount;
-	private String ipServer;
 	private boolean isClientFieldSizeDone = false;
 	private boolean areClientFieldShipsDone = false;
 	private boolean isOpponentReady = false;
 	private Socket s;
 	private int attacksSent = 0;
 
-	public SpielTestNew2(int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
+	public Player(int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
 			int anzahlSchiffeGroesse2) {
 		/*
 		 * Constructor for Server role
@@ -59,7 +58,7 @@ public class SpielTestNew2 {
 
 	}
 
-	public SpielTestNew2(int[][] field, Socket s) {
+	public Player(int[][] field, Socket s) {
 		/*
 		 * Constructor for Client role
 		 */
@@ -569,6 +568,9 @@ public class SpielTestNew2 {
 	}
 
 	private void manageBattle() throws IOException {
+		
+		System.out.println("is " + role + " turn: " + isPlayersTurn);
+		
 		// Netzwerknachrichten lesen und verarbeiten. // Da die graphische Oberfläche
 		// von einem separaten Thread verwaltet // wird, kann man hier unabhängig davon
 		// auf Nachrichten warten. // Manipulationen an der Oberfläche sollten aber
@@ -761,7 +763,7 @@ public class SpielTestNew2 {
 			
 			int[][] field = new int[][] { { 1, 1, 1, 1, 1 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 },
 					{ 0, 0, 0, 0, 0 } };
-			new SpielTestNew2(field, s).start();
+			new Player(field, s).start();
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

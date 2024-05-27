@@ -341,7 +341,7 @@ public class SchiffeAufstellen {
 				if (!this.botWillPlay) {
 					if (this.role == "Server") {
 
-						new SpielTestNew2(this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
+						new Player(this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
 								this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2).start();
 
 					} else if (this.role == "Client") {

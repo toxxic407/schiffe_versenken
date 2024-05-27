@@ -5,7 +5,7 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
-public class SpielComputerNoUI {
+public class PlayerBotNoUI {
 	private BufferedReader in; // Verpackung des Socket-Eingabestroms.
 	private Writer out; // Verpackung des Socket-Ausgabestroms.
 	private boolean isPlayersTurn;
@@ -32,7 +32,7 @@ public class SpielComputerNoUI {
 	private boolean isOpponentReady = false;
 	private Socket s;
 
-	public SpielComputerNoUI(int fieldSize, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4,
+	public PlayerBotNoUI(int fieldSize, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4,
 			int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
 		this.fieldSize = fieldSize;
 		friendlyField = new int[fieldSize][fieldSize];
@@ -574,7 +574,7 @@ public class SpielComputerNoUI {
 	}
 
 	public static void main(String[] args) throws IOException {
-		SpielComputerNoUI spieler = new SpielComputerNoUI(5, 1, 0, 0, 0);
+		PlayerBotNoUI spieler = new PlayerBotNoUI(5, 1, 0, 0, 0);
 
 		spieler.start();
 	}
