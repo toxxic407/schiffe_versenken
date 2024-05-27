@@ -6,35 +6,51 @@ import java.io.*;
 import java.util.*;
 
 public class SpielComputerNoUI {
-	private String role; // Rolle: Server oder Client.
 	private BufferedReader in; // Verpackung des Socket-Eingabestroms.
 	private Writer out; // Verpackung des Socket-Ausgabestroms.
 	private boolean isPlayersTurn;
-	private int lastPositionAttacked;
-	private int indexToAttackNext;
+	private int[] lastPositionAttacked = new int[2];
+	private int[] indexToAttackNext = new int[2];
 	/*
 	 * Werte für enemyField: 0 = unbekant, 1 = geschossen und Wasser gefunden, 2 =
 	 * geschossen und Schief getroffen
 	 */
-	private int[] enemyField = new int[64];
+	private int[][] enemyField;
 	/*
 	 * Werte für friendlyField: 0 = Wasser, 1 = Schiefteil intakt, 2 = Wasser
 	 * Geschossen, 3 = Schiefteil getroffen
 	 */
-	private int[] friendlyField = new int[64];
+	private int[][] friendlyField;
 	private int totalShipPartsCount;
-	private boolean iAmClientAndSentFirstAttackAlready; // used to make the Client send the first attack
-	private String ipServer;
+	private int fieldSize = 0;
+	private int anzahlSchiffeGroesse5 = 0;
+	private int anzahlSchiffeGroesse4 = 0;
+	private int anzahlSchiffeGroesse3 = 0;
+	private int anzahlSchiffeGroesse2 = 0;
+	private boolean isClientFieldSizeDone = false;
+	private boolean areClientFieldShipsDone = false;
+	private boolean isOpponentReady = false;
 
-	public SpielComputerNoUI(String ipServer) {
-		this.ipServer = ipServer;
+	public SpielComputerNoUI(int fieldSize, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4,
+			int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
+		this.fieldSize = fieldSize;
+		friendlyField = new int[fieldSize][fieldSize];
+		enemyField = new int[fieldSize][fieldSize];
+		this.anzahlSchiffeGroesse5 = anzahlSchiffeGroesse5;
+		this.anzahlSchiffeGroesse4 = anzahlSchiffeGroesse4;
+		this.anzahlSchiffeGroesse3 = anzahlSchiffeGroesse3;
+		this.anzahlSchiffeGroesse2 = anzahlSchiffeGroesse2;
+
 	}
 
-	private int countValueOcurrencesInArray(int[] arrayToAnalyze, int valueToFind) {
+	private int countValueOcurrencesInArray(int[][] arrayToAnalyze, int valueToFind) {
 		int output = 0;
 		for (int i = 0; i < arrayToAnalyze.length; i++)
-			if (valueToFind == arrayToAnalyze[i])
-				output++;
+			for (int j = 0; j < arrayToAnalyze.length; j++) {
+				if (valueToFind == arrayToAnalyze[i][j])
+					output++;
+			}
+
 		return output;
 	}
 
@@ -42,12 +58,27 @@ public class SpielComputerNoUI {
 
 		try {
 
-			int positionToAttackNow = indexToAttackNext;
+			int[] positionToAttackNow = new int[] { indexToAttackNext[0], indexToAttackNext[1] };
 			lastPositionAttacked = indexToAttackNext; // save last attacked index
-			indexToAttackNext++;
+			
+
+			// Strategy attack from right to left
+			
+			indexToAttackNext[1] = indexToAttackNext[1] + 1;
+			
+			// Prepare attack for next turn
+			// Make sure that index of column is not out of index
+			if (indexToAttackNext[1] >= fieldSize) {
+				System.out.println("Restarting column index and going to next row");
+				// going to next row
+				indexToAttackNext[0] = indexToAttackNext[0] + 1;
+				// restart column index
+				indexToAttackNext[1] = 0;
+			}
 
 			// send attack
-			out.write(String.format("shot %d%n", positionToAttackNow + 1));
+			System.out.println();
+			out.write(String.format("shot %d %d%n", positionToAttackNow[0], positionToAttackNow[1]));
 			out.flush();
 
 		} catch (IOException ex) {
@@ -56,98 +87,197 @@ public class SpielComputerNoUI {
 
 	}
 
+	static int search(String[] arr, String s) {
+		/* Returns count of occurrences of string s in arr[] */
+		int counter = 0;
+		for (int j = 0; j < arr.length; j++)
+
+			if (s.equals(arr[j]))
+				counter++;
+
+		return counter;
+	}
+
+	
+	private void placeAllShips() {
+		placeShips(anzahlSchiffeGroesse5, 5);
+		placeShips(anzahlSchiffeGroesse4, 4);
+		placeShips(anzahlSchiffeGroesse3, 3);
+		placeShips(anzahlSchiffeGroesse2, 2);
+	}
+	
+	
+	private void placeShips(int numberOfShips, int shipSize) {
+		Random rand = new Random();
+		int count = 0;
+		// Loop until all ships of this size are placed
+		while (count < numberOfShips) {
+			boolean placed = false;
+			// Try to place a ship until it is successfully placed
+			while (!placed) {
+				int row = rand.nextInt(fieldSize);
+				int col = rand.nextInt(fieldSize);
+				boolean horizontal = rand.nextBoolean();
+				// Check if the ship can be placed at this position
+				if (canPlaceShip(row, col, shipSize, horizontal)) {
+					// Place the ship and update the placed flag and count
+					placeShip(row, col, shipSize, horizontal, 1);
+					placed = true;
+					count++;
+				}
+			}
+		}
+	}
+
+	private boolean canPlaceShip(int row, int col, int shipSize, boolean horizontal) {
+		if (horizontal) {
+			// Check if the ship fits horizontally
+			if (col + shipSize > fieldSize)
+				return false;
+			// Check surrounding cells for the minimum distance rule (distance among ships:
+			// at least 1)
+			for (int i = -1; i <= shipSize; i++) {
+				for (int j = -1; j <= 1; j++) {
+					int newRow = row + j;
+					int newCol = col + i;
+					if (isInBounds(newRow, newCol) && this.friendlyField[newRow][newCol] != 0) {
+						return false;
+					}
+				}
+			}
+		} else {
+			// Check if the ship fits vertically
+			if (row + shipSize > fieldSize)
+				return false;
+			// Check surrounding cells for the minimum distance rule
+			for (int i = -1; i <= shipSize; i++) {
+				for (int j = -1; j <= 1; j++) {
+					int newRow = row + i;
+					int newCol = col + j;
+					if (isInBounds(newRow, newCol) && this.friendlyField[newRow][newCol] != 0) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	private void placeShip(int row, int col, int shipSize, boolean horizontal, int shipValue) {
+		if (horizontal) {
+			// Place the ship horizontally
+			for (int i = 0; i < shipSize; i++) {
+				friendlyField[row][col + i] = shipValue;
+			}
+		} else {
+			// Place the ship vertically
+			for (int i = 0; i < shipSize; i++) {
+				friendlyField[row + i][col] = shipValue;
+			}
+		}
+	}
+
+	private boolean isInBounds(int row, int col) {
+		/**
+		 * Method to check if a position is within the bounds of the field
+		 */
+		return row >= 0 && row < fieldSize && col >= 0 && col < fieldSize;
+	}
+
+	
 	public void start() throws IOException {
 
-		indexToAttackNext = 0;
+		indexToAttackNext = new int[] { 0, 0 };
 
-		// make friendly field have at least one ship
-		// if random number is even, the field it has one structure, if not, another
-		// structure
-		Random rand = new Random();
-
-		int n = rand.nextInt(10);
-		// add Schieff of lenght 3
-		if (n % 2 == 0) {
-			friendlyField[10] = 1;
-			friendlyField[11] = 1;
-			friendlyField[12] = 1;
-		} else {
-			friendlyField[38] = 1;
-			friendlyField[46] = 1;
-			friendlyField[54] = 1;
-		}
-
-		// add Schief of lenght 2
-		int n2 = rand.nextInt(10);
-		// add Schieff of lenght 3
-		if (n2 % 2 == 0) {
-			friendlyField[50] = 1;
-			friendlyField[51] = 1;
-		} else {
-			friendlyField[26] = 1;
-			friendlyField[34] = 1;
-		}
-
-		// add Schief of lenght 1
-		int n3 = rand.nextInt(10);
-		if (n3 % 2 == 0) {
-			friendlyField[0] = 1;
-
-		} else {
-			friendlyField[16] = 1;
-
-		}
-
-		// register total number of ship parts
-		totalShipPartsCount = countValueOcurrencesInArray(friendlyField, 1);
+		// role is always Client when the player is Computer with no UI. Server is
+		// localhost
+		isPlayersTurn = false; // Server starts playing
 
 		// Verwendete Portnummer (vgl. Server.java).
 		final int port = 50000;
 
-		// Socketverbindung zur anderen "Seite" herstellen.
-		Socket s;
-		if (this.ipServer.length() == 0) {
-			role = "Server";
+		Socket s = new Socket("localhost", port);
 
-			isPlayersTurn = false; // Server does not start playing
-
-			// Die eigene(n) IP-Adresse(n) ausgeben,
-			// damit der Benutzer sie dem Benutzer des Clients mitteilen kann.
-			System.out.print("My IP address(es):");
-			Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
-			while (nis.hasMoreElements()) {
-				NetworkInterface ni = nis.nextElement();
-				Enumeration<InetAddress> ias = ni.getInetAddresses();
-				while (ias.hasMoreElements()) {
-					InetAddress ia = ias.nextElement();
-					if (!ia.isLoopbackAddress()) {
-						System.out.print(" " + ia.getHostAddress());
-					}
-				}
-			}
-			System.out.println();
-			System.out.println("Waiting for client connection ...");
-
-			ServerSocket ss = new ServerSocket(port);
-			s = ss.accept();
-		} else {
-			role = "Client";
-			isPlayersTurn = true; // Client starts playing
-
-			s = new Socket(this.ipServer, port);
-
-			System.out.println();
-			System.out.println();
-		}
 		System.out.println("Connection established.");
+
+		// register total number of ship parts
+		totalShipPartsCount = countValueOcurrencesInArray(friendlyField, 1);
 
 		// Ein- und Ausgabestrom des Sockets ermitteln
 		// und als BufferedReader bzw. Writer verpacken.
 		in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		out = new OutputStreamWriter(s.getOutputStream());
 
-		// if player is Client and did not send first attack, send first attack
-		if (role == "Client" && iAmClientAndSentFirstAttackAlready == false) {
+		
+		// get field size
+		while (!isClientFieldSizeDone) {
+			System.out.println("Waiting for field size...");
+			String line = in.readLine(); // read line from socket
+			System.out.println("received: " + line);
+			String[] responseList = line.split(" "); // split line based on whitespace
+
+			if (responseList[0].equals("size")) {
+				this.fieldSize = Integer.parseInt(responseList[1]);
+				
+				isClientFieldSizeDone = true;
+
+				// answer "done"
+				out.write(String.format("done %n"));
+				out.flush();
+				
+				System.out.println("Size recieved correctly, send done response...");
+
+			}
+		}
+		
+		// TODO create field according to obtained data
+		this.friendlyField = new int[this.fieldSize][this.fieldSize];
+		this.enemyField = new int[this.fieldSize][this.fieldSize];
+
+		// get number of each ship size
+		while (!areClientFieldShipsDone) {
+			String line = in.readLine(); // read line from socket
+			System.out.println("received: " + line);
+			String[] responseList = line.split(" "); // split line based on whitespace
+
+			if (responseList[0].equals("ships")) {
+				// get number of ship of each size
+				this.anzahlSchiffeGroesse5 = search(responseList, "5");
+				this.anzahlSchiffeGroesse4 = search(responseList, "4");
+				this.anzahlSchiffeGroesse3 = search(responseList, "3");
+				this.anzahlSchiffeGroesse2 = search(responseList, "2");
+				
+				areClientFieldShipsDone = true;
+
+				// answer "done"
+				out.write(String.format("done %n"));
+				out.flush();
+			}
+		}
+		
+		// place ships in random positions
+		placeAllShips();
+
+		// wait until server is ready
+		while (!isOpponentReady) {
+			String line = in.readLine(); // read line from socket
+			System.out.println("received: " + line);
+			String[] responseList = line.split(" "); // split line based on whitespace
+			
+			if (responseList[0].equals("ready")) {
+				isOpponentReady = true;
+
+				// answer "ready"
+				out.write(String.format("ready %n"));
+				out.flush();
+			}
+			
+		}
+
+		
+		/*	
+		// since role is Client, send first attack if did not send yet
+		if (iAmClientAndSentFirstAttackAlready == false) {
 
 			System.out.println("I am the client. I should attack first.");
 
@@ -158,6 +288,9 @@ public class SpielComputerNoUI {
 			System.out.println("First attack sent");
 
 		}
+		*/
+		
+		
 
 		// Netzwerknachrichten lesen und verarbeiten.
 		// Da die graphische Oberfläche von einem separaten Thread verwaltet
@@ -174,12 +307,13 @@ public class SpielComputerNoUI {
 			// player is receiving an attack
 			if (responseList[0].equals("shot")) {
 				// process attack
-				int positionAttacked = Integer.parseInt(responseList[1]);
+				int positionAttackedRow = Integer.parseInt(responseList[1]);
+				int positionAttackedColumn = Integer.parseInt(responseList[2]);
 				int attackResult = -1;
 				// TODO attackResult = 2
 
 				// prepare answer according to the content of the attacked position
-				switch (friendlyField[positionAttacked - 1]) {
+				switch (friendlyField[positionAttackedRow][positionAttackedColumn]) {
 				case 0: // es gibt Wasser in indexAttacked - 1
 				{
 					attackResult = 0;
@@ -189,19 +323,22 @@ public class SpielComputerNoUI {
 				}
 				case 1: // es gibt Schieffteil in indexAttacked - 1
 				{
+					// TODO see if the ship has been destroyed completely to send 2
 					attackResult = 1;
-					friendlyField[positionAttacked - 1] = 3; // change to hit ship part
+					friendlyField[positionAttackedRow][positionAttackedColumn] = 3; // change to hit ship part
 					isPlayersTurn = false;
 					// System.out.println("NOT " + role + "'s turn now");
+					
+					 
 					break;
 				}
 
 				}
 
 				// send answer
+				//System.out.println("sent: " + String.format("answer %d%n", attackResult));
 				out.write(String.format("answer %d%n", attackResult));
 				out.flush();
-
 
 				// check if player lost: count of ships (value = 1) is 0
 				if (countValueOcurrencesInArray(friendlyField, 1) == 0) {
@@ -224,7 +361,7 @@ public class SpielComputerNoUI {
 				switch (attackAnswerNumber) {
 				case 0: // Wasser geschossen
 				{
-					enemyField[lastPositionAttacked] = 1;
+					enemyField[lastPositionAttacked[0]][lastPositionAttacked[1]] = 1;
 					isPlayersTurn = false;
 					// System.out.println("NOT " + role + "'s turn anymore");
 					// send answer "pass"
@@ -234,7 +371,7 @@ public class SpielComputerNoUI {
 				}
 				case 1: // geschossen und Schief getroffen
 				{
-					enemyField[lastPositionAttacked] = 2;
+					enemyField[lastPositionAttacked[0]][lastPositionAttacked[1]] = 2;
 					isPlayersTurn = true;
 					// System.out.println("Still " +role+"'s turn");
 					break;
@@ -268,6 +405,13 @@ public class SpielComputerNoUI {
 		System.out.println("Connection closed.");
 		System.exit(0);
 
+	}
+	
+	public static void main(String[] args) throws IOException {
+		SpielComputerNoUI spieler = new SpielComputerNoUI(10, 1, 3,
+				2, 1);
+		
+		spieler.start();
 	}
 
 }

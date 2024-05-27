@@ -10,6 +10,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 class Menu {
 	// Graphische Oberfläche aufbauen und anzeigen.
 
+	/*
 	public static void startGameFrame(SpielTestNew spielTestFrame) {
 		(new Thread() {
 			@Override
@@ -39,7 +40,8 @@ class Menu {
 			}
 		}).start();
 	}
-	
+	*/
+
 	public static void start() {
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 		// "Swing1" wird in den Titelbalken geschrieben.
@@ -60,19 +62,16 @@ class Menu {
 		// Dehnbaren Zwischenraum am oberen Rand hinzufügen.
 		frame.add(Box.createGlue());
 
-		// Button: Spielen
-		/*
-		JButton buttonSpielen = new JButton("Spielen");
-		buttonSpielen.setAlignmentX(Component.CENTER_ALIGNMENT);
-		buttonSpielen.addActionListener((e) -> {
-			System.out.println("Knopf gedrückt: Spielen");
+		// Button: Gegen anderen Spieler spielen
+		JButton buttonGegenSpieler = new JButton("Gegen anderen Speieler spielen");
+		buttonGegenSpieler.setAlignmentX(Component.CENTER_ALIGNMENT);
+		buttonGegenSpieler.addActionListener((e) -> {
+			System.out.println("Knopf gedrückt: Gegen anderen Speieler spielen");
+
 			frame.setVisible(false); // this will close current login box window
 
-			new SpielErstellen(frame, true); // display windows to create game, playAgainstComputer = true
-
 		});
-		frame.add(buttonSpielen);
-		*/
+		frame.add(buttonGegenSpieler);
 
 		// Festen Zwischenraum der Größe 50 Pixel hinzufügen.
 		frame.add(Box.createVerticalStrut(50));
@@ -85,12 +84,14 @@ class Menu {
 
 			frame.setVisible(false); // this will close current login box window
 
-			SpielTestNew spielTestNew = new SpielTestNew("");
-			SpielComputerNoUI spielComputerNoUI = new SpielComputerNoUI("localhost");
+			//SpielTestNew spielTestNew = new SpielTestNew("");
+			//SpielComputerNoUI spielComputerNoUI = new SpielComputerNoUI("localhost");
 
-			startGameFrame(spielTestNew);
+			//startGameFrame(spielTestNew);
 
-			startGameFrameNoUI(spielComputerNoUI);
+			//startGameFrameNoUI(spielComputerNoUI);
+			
+			new SpielErstellen("Server", frame, true);
 
 		});
 		frame.add(buttonGegenComputer);

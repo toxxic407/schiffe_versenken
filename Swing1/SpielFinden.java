@@ -96,7 +96,7 @@ class SpielFinden {
 	    (e) -> { 
 	    	System.out.println("Knopf gedrückt: Neues Spiel erstellen"); 
 	    	frame.setVisible(false);   // this will close current login box window
-	    	new SpielErstellen(menuFrame, playAgainstComputer);    // display windows to create game, playAgainstComputer = true
+	    	new SpielErstellen("Server", menuFrame, playAgainstComputer);    // display windows to create game, playAgainstComputer = true
 	    	}
 	);
 	frame.add(buttonSpielErstellen);
