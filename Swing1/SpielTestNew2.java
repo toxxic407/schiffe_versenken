@@ -18,7 +18,7 @@ public class SpielTestNew2 {
 	private int[][] enemyField;
 	/*
 	 * Werte für friendlyField: 0 = Wasser, 1 = Schiefteil intakt, 2 = Wasser
-	 * Geschossen, 3 = Schiefteil getroffen, 4 = Schiff destroyed 
+	 * Geschossen, 3 = Schiefteil getroffen, 4 = Schiff destroyed
 	 */
 	private int[][] friendlyField;
 	private int anzahlSchiffeGroesse5 = 0;
@@ -108,7 +108,7 @@ public class SpielTestNew2 {
 						lastPositionAttacked = new int[] { row, column }; // save last attacked index
 
 						// System.out.println(String.format("sent: shot %d%n", index + 1));
-						
+
 						this.attacksSent = this.attacksSent + 1;
 
 						// send attack
@@ -185,8 +185,39 @@ public class SpielTestNew2 {
 
 	// Graphische Oberfläche aufbauen und anzeigen.
 	private void startGui() {
-		
+
 		/*
+		 * // Hauptfenster mit Titelbalken etc. (JFrame) erzeugen. this.mainFrame = new
+		 * JFrame(role);
+		 * 
+		 * // Beim Schließen des Fensters (z. B. durch Drücken des // X-Knopfs in
+		 * Windows) soll das Programm beendet werden.
+		 * this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		 * 
+		 * // Der Inhalt des Fensters soll von einem BoxLayout-Manager // verwaltet
+		 * werden, der seine Bestandteile vertikal (von // oben nach unten) anordnet.
+		 * this.mainFrame.setContentPane(Box.createVerticalBox());
+		 * 
+		 * // Dehnbaren Zwischenraum am oberen Rand hinzufügen.
+		 * this.mainFrame.add(Box.createGlue());
+		 * 
+		 * // add enemy's field JLabel label1 = new JLabel("Gegnerisches Spielfeld");
+		 * label1.setAlignmentX(Component.CENTER_ALIGNMENT); this.mainFrame.add(label1);
+		 * 
+		 * enemyPanel = new JPanel(); spawnEnemyField(); this.mainFrame.add(enemyPanel);
+		 * 
+		 * // add player's field JLabel label2 = new JLabel("Ihres Spielfeld");
+		 * label2.setAlignmentX(Component.CENTER_ALIGNMENT); this.mainFrame.add(label2);
+		 * 
+		 * friendlyPanel = new JPanel(); spawnFriendlyField();
+		 * this.mainFrame.add(friendlyPanel);
+		 * 
+		 * // Am Schluss (!) die optimale Fenstergröße ermitteln (pack) // und das
+		 * Fenster anzeigen (setVisible). this.mainFrame.pack();
+		 * this.mainFrame.setVisible(true);
+		 * 
+		 */
+
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 		this.mainFrame = new JFrame(role);
 
@@ -202,76 +233,37 @@ public class SpielTestNew2 {
 		// Dehnbaren Zwischenraum am oberen Rand hinzufügen.
 		this.mainFrame.add(Box.createGlue());
 
-		// add enemy's field
-		JLabel label1 = new JLabel("Gegnerisches Spielfeld");
-		label1.setAlignmentX(Component.CENTER_ALIGNMENT);
-		this.mainFrame.add(label1);
+		// Create a panel with GridLayout to arrange enemy and friendly fields
+		// horizontally
+		JPanel fieldsPanel = new JPanel(new GridLayout(1, 2));
 
+		// Enemy field
+		JPanel enemyContainer = new JPanel(new BorderLayout());
+		JLabel enemyLabel = new JLabel("Gegnerisches Spielfeld", JLabel.CENTER);
 		enemyPanel = new JPanel();
 		spawnEnemyField();
-		this.mainFrame.add(enemyPanel);
+		enemyContainer.add(enemyLabel, BorderLayout.NORTH);
+		enemyContainer.add(enemyPanel, BorderLayout.CENTER);
 
-		// add player's field
-		JLabel label2 = new JLabel("Ihres Spielfeld");
-		label2.setAlignmentX(Component.CENTER_ALIGNMENT);
-		this.mainFrame.add(label2);
-
+		// Friendly field
+		JPanel friendlyContainer = new JPanel(new BorderLayout());
+		JLabel friendlyLabel = new JLabel("Ihres Spielfeld", JLabel.CENTER);
 		friendlyPanel = new JPanel();
 		spawnFriendlyField();
-		this.mainFrame.add(friendlyPanel);
+		friendlyContainer.add(friendlyLabel, BorderLayout.NORTH);
+		friendlyContainer.add(friendlyPanel, BorderLayout.CENTER);
+
+		// Add both fields to the fieldsPanel
+		fieldsPanel.add(enemyContainer);
+		fieldsPanel.add(friendlyContainer);
+
+		// Add the fieldsPanel to the main frame
+		this.mainFrame.add(fieldsPanel);
 
 		// Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
 		// und das Fenster anzeigen (setVisible).
 		this.mainFrame.pack();
 		this.mainFrame.setVisible(true);
-		
-		*/
-		
-		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
-	    this.mainFrame = new JFrame(role);
-
-	    // Beim Schließen des Fensters (z. B. durch Drücken des
-	    // X-Knopfs in Windows) soll das Programm beendet werden.
-	    this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-	    // Der Inhalt des Fensters soll von einem BoxLayout-Manager
-	    // verwaltet werden, der seine Bestandteile vertikal (von
-	    // oben nach unten) anordnet.
-	    this.mainFrame.setContentPane(Box.createVerticalBox());
-
-	    // Dehnbaren Zwischenraum am oberen Rand hinzufügen.
-	    this.mainFrame.add(Box.createGlue());
-
-	    // Create a panel with GridLayout to arrange enemy and friendly fields horizontally
-	    JPanel fieldsPanel = new JPanel(new GridLayout(1, 2));
-
-	    // Enemy field
-	    JPanel enemyContainer = new JPanel(new BorderLayout());
-	    JLabel enemyLabel = new JLabel("Gegnerisches Spielfeld", JLabel.CENTER);
-	    enemyPanel = new JPanel();
-	    spawnEnemyField();
-	    enemyContainer.add(enemyLabel, BorderLayout.NORTH);
-	    enemyContainer.add(enemyPanel, BorderLayout.CENTER);
-
-	    // Friendly field
-	    JPanel friendlyContainer = new JPanel(new BorderLayout());
-	    JLabel friendlyLabel = new JLabel("Ihres Spielfeld", JLabel.CENTER);
-	    friendlyPanel = new JPanel();
-	    spawnFriendlyField();
-	    friendlyContainer.add(friendlyLabel, BorderLayout.NORTH);
-	    friendlyContainer.add(friendlyPanel, BorderLayout.CENTER);
-
-	    // Add both fields to the fieldsPanel
-	    fieldsPanel.add(enemyContainer);
-	    fieldsPanel.add(friendlyContainer);
-
-	    // Add the fieldsPanel to the main frame
-	    this.mainFrame.add(fieldsPanel);
-
-	    // Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
-	    // und das Fenster anzeigen (setVisible).
-	    this.mainFrame.pack();
-	    this.mainFrame.setVisible(true);
 	}
 
 	private void refreshGui() {
@@ -299,28 +291,16 @@ public class SpielTestNew2 {
 	}
 
 	public void start() {
-	        new Thread(() -> {
-	            try {
-	                runGame();
-	            } catch (IOException e) {
-	                e.printStackTrace();
-	            }
-	        }).start();
+		new Thread(() -> {
+			try {
+				runGame();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}).start();
 	}
 
-	public void runGame() throws IOException {
-		
-		// Graphische Oberfläche aufbauen.
-		SwingUtilities.invokeLater(() -> {
-			startGui();
-		});
-		
-		
-		// inform the user that the field will be activated when the other player is ready
-		JOptionPane.showMessageDialog(mainFrame, "Das Spielfeld wird aktiviert, wenn der andere Spieler bereit ist.");
-		
-		// register total number of ship parts
-		totalShipPartsCount = countValueOcurrencesInArray(friendlyField, 1);
+	public void manageSocketConnection() throws IOException {
 
 		// Verwendete Portnummer (vgl. Server.java).
 		final int port = 50000;
@@ -359,8 +339,11 @@ public class SpielTestNew2 {
 
 		// Ein- und Ausgabestrom des Sockets ermitteln
 		// und als BufferedReader bzw. Writer verpacken.
-		in = new BufferedReader(new InputStreamReader(this.s.getInputStream()));
-		out = new OutputStreamWriter(this.s.getOutputStream());
+		this.in = new BufferedReader(new InputStreamReader(this.s.getInputStream()));
+		this.out = new OutputStreamWriter(this.s.getOutputStream());
+	}
+
+	public void managePreparationBeforeBattle() throws IOException {
 
 		// Preparation before battle
 		// Side: Server
@@ -412,12 +395,11 @@ public class SpielTestNew2 {
 
 				if (responseList[0].equals("ready")) {
 					this.isOpponentReady = true;
-					
+
 					// refresh GUI since opponent is ready and Server can send Attack
 					// reload fields
 					spawnFriendlyField();
 					spawnEnemyField();
-
 
 				}
 
@@ -448,15 +430,16 @@ public class SpielTestNew2 {
 
 		System.out.println("Both players are ready");
 		JOptionPane.showMessageDialog(mainFrame, "Der andere Spieler ist bereit.");
+	}
 
+	private void manageBattle() throws IOException {
 		// Netzwerknachrichten lesen und verarbeiten. // Da die graphische Oberfläche
 		// von einem separaten Thread verwaltet // wird, kann man hier unabhängig davon
 		// auf Nachrichten warten. // Manipulationen an der Oberfläche sollten aber
 		// mittels invokeLater // (oder invokeAndWait) ausgeführt werden.
-		
+
 		while (true) {
-			
-			
+
 			String line = in.readLine(); // read line from socket
 			System.out.println("received: " + line);
 			String[] responseList = line.split(" "); // split line based on whitespace
@@ -476,7 +459,7 @@ public class SpielTestNew2 {
 				// es gibt Wasser in indexAttacked - 1
 				{
 					attackResult = 0;
-					friendlyField[positionAttackedRow][positionAttackedColumn] = 2;		// change to hit water
+					friendlyField[positionAttackedRow][positionAttackedColumn] = 2; // change to hit water
 					isPlayersTurn = true; //
 					System.out.println(role + "'s turn now");
 					break;
@@ -557,17 +540,37 @@ public class SpielTestNew2 {
 
 			if (line == null)
 				break;
-			
-		}
-		
 
-		/*
-		// EOF ins Socket "schreiben" und das Programm explizit beenden // (weil es
-		// sonst weiterlaufen würde, bis der Benutzer das Hauptfenster // schließt).
-		this.s.shutdownOutput();
-		System.out.println("Connection closed.");
-		System.exit(0);
-*/
+		}
+
+	}
+
+	public void runGame() throws IOException {
+
+		// Graphische Oberfläche aufbauen.
+		SwingUtilities.invokeLater(() -> {
+			startGui();
+		});
+
+		// inform the user that the field will be activated when the other player is
+		// ready
+		JOptionPane.showMessageDialog(mainFrame, "Das Spielfeld wird aktiviert, wenn der andere Spieler bereit ist.");
+
+		// register total number of ship parts
+		totalShipPartsCount = countValueOcurrencesInArray(friendlyField, 1);
+		
+		manageSocketConnection();
+
+		managePreparationBeforeBattle();
+
+		manageBattle();
+		
+		 // EOF ins Socket "schreiben" und das Programm explizit beenden // (weil es
+		 // sonst weiterlaufen würde, bis der Benutzer das Hauptfenster // schließt).
+		 this.s.shutdownOutput(); 
+		 System.out.println("Connection closed.");
+		 System.exit(0);
+		 
 	}
 
 }
