@@ -132,7 +132,7 @@ class SpielErstellen {
 			panel.setLayout(new GridLayout(3, 2, 10, 50));
 			{
 				JLabel labelSize = new JLabel("Breite un Höhe");
-				txtfldSize = new JTextField("10");
+				txtfldSize = new JTextField("5");		// 10
 				txtfldSize.setMaximumSize(new Dimension(50, txtfldSize.getPreferredSize().height));
 
 				panel.add(labelSize);
@@ -144,16 +144,16 @@ class SpielErstellen {
 			panel2.setLayout(new GridLayout(5, 2, 5, 10));
 			{
 				JLabel labelGroesse5 = new JLabel("Größe \"5\"");
-				textFielGroesse5 = new JTextField("1");
+				textFielGroesse5 = new JTextField("1");		// 1
 				textFielGroesse5.setMaximumSize(new Dimension(200, textFielGroesse5.getPreferredSize().height));
 				JLabel labelGroesse4 = new JLabel("Größe \"4\"");
-				 textFielGroesse4 = new JTextField("3");
+				 textFielGroesse4 = new JTextField("0");	// 3
 				textFielGroesse4.setMaximumSize(new Dimension(200, textFielGroesse4.getPreferredSize().height));
 				JLabel labelGroesse3 = new JLabel("Größe \"3\"");
-				textFielGroesse3 = new JTextField("2");
+				textFielGroesse3 = new JTextField("0");		// 2
 				textFielGroesse3.setMaximumSize(new Dimension(200, textFielGroesse3.getPreferredSize().height));
 				JLabel labelGroesse2 = new JLabel("Größe \"2\"");
-				textFielGroesse2 = new JTextField("1");
+				textFielGroesse2 = new JTextField("0");		// 1
 				textFielGroesse2.setMaximumSize(new Dimension(200, textFielGroesse2.getPreferredSize().height));
 
 				panel2.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);

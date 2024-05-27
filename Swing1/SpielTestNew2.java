@@ -21,6 +21,7 @@ public class SpielTestNew2 {
 	 * Geschossen, 3 = Schiefteil getroffen, 4 = Schiff destroyed
 	 */
 	private int[][] friendlyField;
+	private int fieldSize;
 	private int anzahlSchiffeGroesse5 = 0;
 	private int anzahlSchiffeGroesse4 = 0;
 	private int anzahlSchiffeGroesse3 = 0;
@@ -45,10 +46,12 @@ public class SpielTestNew2 {
 		 */
 		this.role = "Server";
 		this.friendlyField = field;
+		this.fieldSize = field.length;
 		this.anzahlSchiffeGroesse5 = anzahlSchiffeGroesse5;
 		this.anzahlSchiffeGroesse4 = anzahlSchiffeGroesse4;
 		this.anzahlSchiffeGroesse3 = anzahlSchiffeGroesse3;
 		this.anzahlSchiffeGroesse2 = anzahlSchiffeGroesse2;
+
 		this.enemyField = new int[field.length][field.length];
 
 		System.out.println(Arrays.deepToString(enemyField));
@@ -62,10 +65,16 @@ public class SpielTestNew2 {
 		 */
 		this.role = "Client";
 		this.friendlyField = field;
+		this.fieldSize = field.length;
 		this.s = s;
+
+		this.enemyField = new int[field.length][field.length];
+
+		System.out.println(Arrays.deepToString(enemyField));
+		System.out.println(Arrays.deepToString(friendlyField));
 	}
 
-	public void spawnEnemyField() {
+	private void spawnEnemyField() {
 		enemyPanel.remove(enemyGridPanel);
 		enemyGridPanel.removeAll();
 		enemyGridPanel = new JPanel();
@@ -98,6 +107,10 @@ public class SpielTestNew2 {
 				if (enemyField[row][column] == 2) {
 					// getroffen
 					button.setBackground(Color.orange);
+				}
+				if (enemyField[row][column] == 3) {
+					// getroffen
+					button.setBackground(Color.red);
 				}
 
 				// add action listener to send attacke
@@ -132,7 +145,7 @@ public class SpielTestNew2 {
 		enemyPanel.repaint();
 	}
 
-	public void spawnFriendlyField() {
+	private void spawnFriendlyField() {
 		friendlyPanel.remove(friendlyGridPanel);
 		friendlyGridPanel.removeAll();
 		friendlyGridPanel = new JPanel();
@@ -156,10 +169,12 @@ public class SpielTestNew2 {
 				}
 				if (friendlyField[i][j] == 3) {
 					// Schiefteil getroffen
+					button.setBackground(Color.orange);
+				}
+				if (friendlyField[i][j] == 4) {
+					// Schiefteil getroffen
 					button.setBackground(Color.red);
 				}
-
-				// add action listener to send attacke
 
 				friendlyGridPanel.add(button);
 			}
@@ -185,39 +200,6 @@ public class SpielTestNew2 {
 
 	// Graphische Oberfläche aufbauen und anzeigen.
 	private void startGui() {
-
-		/*
-		 * // Hauptfenster mit Titelbalken etc. (JFrame) erzeugen. this.mainFrame = new
-		 * JFrame(role);
-		 * 
-		 * // Beim Schließen des Fensters (z. B. durch Drücken des // X-Knopfs in
-		 * Windows) soll das Programm beendet werden.
-		 * this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		 * 
-		 * // Der Inhalt des Fensters soll von einem BoxLayout-Manager // verwaltet
-		 * werden, der seine Bestandteile vertikal (von // oben nach unten) anordnet.
-		 * this.mainFrame.setContentPane(Box.createVerticalBox());
-		 * 
-		 * // Dehnbaren Zwischenraum am oberen Rand hinzufügen.
-		 * this.mainFrame.add(Box.createGlue());
-		 * 
-		 * // add enemy's field JLabel label1 = new JLabel("Gegnerisches Spielfeld");
-		 * label1.setAlignmentX(Component.CENTER_ALIGNMENT); this.mainFrame.add(label1);
-		 * 
-		 * enemyPanel = new JPanel(); spawnEnemyField(); this.mainFrame.add(enemyPanel);
-		 * 
-		 * // add player's field JLabel label2 = new JLabel("Ihres Spielfeld");
-		 * label2.setAlignmentX(Component.CENTER_ALIGNMENT); this.mainFrame.add(label2);
-		 * 
-		 * friendlyPanel = new JPanel(); spawnFriendlyField();
-		 * this.mainFrame.add(friendlyPanel);
-		 * 
-		 * // Am Schluss (!) die optimale Fenstergröße ermitteln (pack) // und das
-		 * Fenster anzeigen (setVisible). this.mainFrame.pack();
-		 * this.mainFrame.setVisible(true);
-		 * 
-		 */
-
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 		this.mainFrame = new JFrame(role);
 
@@ -266,26 +248,25 @@ public class SpielTestNew2 {
 		this.mainFrame.setVisible(true);
 	}
 
-	private void refreshGui() {
-
-		SwingUtilities.invokeLater(() -> {
-			// SwingUtilities.updateComponentTreeUI(this.mainFrame);
-
-			this.mainFrame.invalidate();
-			this.mainFrame.validate();
-			this.mainFrame.repaint();
-
-		});
-	}
-
 	private String getShipsSettingAsString() {
 		String out = "";
 
-		out += "5 ".repeat(anzahlSchiffeGroesse5);
-		out += "4 ".repeat(anzahlSchiffeGroesse4);
-		out += "3 ".repeat(anzahlSchiffeGroesse3);
-		out += "2 ".repeat(anzahlSchiffeGroesse2 - 1);
-		out += "2".repeat(1);
+		if (anzahlSchiffeGroesse5 > 0) {
+			out += "5 ".repeat(anzahlSchiffeGroesse5);
+		}
+
+		if (anzahlSchiffeGroesse4 > 0) {
+			out += "4 ".repeat(anzahlSchiffeGroesse4);
+		}
+
+		if (anzahlSchiffeGroesse3 > 0) {
+			out += "3 ".repeat(anzahlSchiffeGroesse3);
+		}
+
+		if (anzahlSchiffeGroesse2 > 0) {
+			out += "2 ".repeat(anzahlSchiffeGroesse2 - 1);
+			out += "2".repeat(1);
+		}
 
 		return out;
 	}
@@ -300,7 +281,7 @@ public class SpielTestNew2 {
 		}).start();
 	}
 
-	public void manageSocketConnection() throws IOException {
+	private void manageSocketConnection() throws IOException {
 
 		// Verwendete Portnummer (vgl. Server.java).
 		final int port = 50000;
@@ -343,7 +324,7 @@ public class SpielTestNew2 {
 		this.out = new OutputStreamWriter(this.s.getOutputStream());
 	}
 
-	public void managePreparationBeforeBattle() throws IOException {
+	private void managePreparationBeforeBattle() throws IOException {
 
 		// Preparation before battle
 		// Side: Server
@@ -432,6 +413,161 @@ public class SpielTestNew2 {
 		JOptionPane.showMessageDialog(mainFrame, "Der andere Spieler ist bereit.");
 	}
 
+	private int[] getEnemyShipInfo(int x, int y) {
+		int size = 0;
+		boolean vertical = false;
+
+		// Determine if the ship is vertical or horizontal
+		if (x > 0 && (enemyField[x - 1][y] == 2) || x < fieldSize - 1 && (enemyField[x + 1][y] == 2)) {
+			vertical = true;
+		}
+
+		// Find the start of the ship
+		int startX = x;
+		int startY = y;
+		if (vertical) {
+			while (startX > 0 && (enemyField[startX - 1][y] == 2)) {
+				startX--;
+			}
+			// Calculate the size of the ship
+			while (startX + size < fieldSize && (enemyField[startX + size][y] == 2)) {
+				size++;
+			}
+		} else {
+			while (startY > 0 && (enemyField[x][startY - 1] == 2)) {
+				startY--;
+			}
+			// Calculate the size of the ship
+			while (startY + size < fieldSize && (enemyField[x][startY + size] == 2)) {
+				size++;
+			}
+		}
+
+		return new int[] { size, vertical ? 1 : 0, startX, startY };
+
+	}
+
+	private void markDestroyedEnemyShip(int x, int y) {
+		// get basic information about the ship
+		int[] enemyShipInfo = getEnemyShipInfo(x, y);
+		int shipSize = enemyShipInfo[0];
+		boolean vertical = enemyShipInfo[1] == 1;
+		int startShipX = enemyShipInfo[2];
+		int startShipY = enemyShipInfo[3];
+
+		// change the values of the ship to mark it as destroyed, according to its
+		// orientation
+		if (vertical) {
+			for (int i = 0; i < shipSize; i++) {
+				enemyField[startShipX + i][startShipY] = 3;
+
+			}
+		} else {
+
+			for (int i = 0; i < shipSize; i++) {
+				enemyField[startShipX][startShipY + i] = 3;
+
+			}
+		}
+		System.out.println(Arrays.deepToString(enemyField));
+	}
+
+	private int[] getShipInfo(int x, int y) {
+		int size = 0;
+		boolean vertical = false;
+
+		// Determine if the ship is vertical or horizontal
+		if (x > 0 && (friendlyField[x - 1][y] == 1 || friendlyField[x - 1][y] == 3)
+				|| x < fieldSize - 1 && (friendlyField[x + 1][y] == 1 || friendlyField[x + 1][y] == 3)) {
+			vertical = true;
+		}
+
+		// Find the start of the ship
+		int startX = x;
+		int startY = y;
+		if (vertical) {
+			while (startX > 0 && (friendlyField[startX - 1][y] == 1 || friendlyField[startX - 1][y] == 3)) {
+				startX--;
+			}
+			// Calculate the size of the ship
+			while (startX + size < fieldSize
+					&& (friendlyField[startX + size][y] == 1 || friendlyField[startX + size][y] == 3)) {
+				size++;
+			}
+		} else {
+			while (startY > 0 && (friendlyField[x][startY - 1] == 1 || friendlyField[x][startY - 1] == 3)) {
+				startY--;
+			}
+			// Calculate the size of the ship
+			while (startY + size < fieldSize
+					&& (friendlyField[x][startY + size] == 1 || friendlyField[x][startY + size] == 3)) {
+				size++;
+			}
+		}
+
+		return new int[] { size, vertical ? 1 : 0, startX, startY };
+	}
+
+	private boolean isShipCompletelyDestroyed(int x, int y) {
+		int countHitParts = 0;
+
+		int[] shipInfo = getShipInfo(x, y);
+		int shipSize = shipInfo[0];
+		boolean vertical = shipInfo[1] == 1;
+		int startShipX = shipInfo[2];
+		int startShipY = shipInfo[3];
+
+		if (vertical) {
+			for (int i = 0; i < shipSize; i++) {
+				if (friendlyField[startShipX + i][startShipY] == 3) {
+					// ship part value = 3 means hit by enemy
+					System.out.print("(" + (startShipX + i) + "," + startShipY + ")");
+					countHitParts++;
+				}
+
+			}
+		} else {
+
+			for (int i = 0; i < shipSize; i++) {
+				if (friendlyField[startShipX][startShipY + i] == 3) {
+					// ship part value = 3 means hit by enemy
+					System.out.print("(" + startShipX + "," + (startShipY + i) + ")");
+					countHitParts++;
+				}
+
+			}
+		}
+
+		System.out.println();
+		System.out.println("Hit parts: " + countHitParts + ", shipSize: " + shipSize);
+		return countHitParts == shipSize;
+
+	}
+
+	private void markDestroyedShip(int x, int y) {
+		// get basic information about the ship
+		int[] shipInfo = getShipInfo(x, y);
+		int shipSize = shipInfo[0];
+		boolean vertical = shipInfo[1] == 1;
+		int startShipX = shipInfo[2];
+		int startShipY = shipInfo[3];
+
+		// change the values of the ship to mark it as destroyed, according to its
+		// orientation
+		if (vertical) {
+			for (int i = 0; i < shipSize; i++) {
+				friendlyField[startShipX + i][startShipY] = 4;
+
+			}
+		} else {
+
+			for (int i = 0; i < shipSize; i++) {
+				friendlyField[startShipX][startShipY + i] = 4;
+
+			}
+		}
+	}
+
 	private void manageBattle() throws IOException {
 		// Netzwerknachrichten lesen und verarbeiten. // Da die graphische Oberfläche
 		// von einem separaten Thread verwaltet // wird, kann man hier unabhängig davon
@@ -448,6 +584,7 @@ public class SpielTestNew2 {
 
 			// player is receiving an attack
 			if (responseList[0].equals("shot")) {
+				System.out.println("attacked received");
 				// process attack
 				int positionAttackedRow = Integer.parseInt(responseList[1]);
 				int positionAttackedColumn = Integer.parseInt(responseList[2]);
@@ -461,7 +598,7 @@ public class SpielTestNew2 {
 					attackResult = 0;
 					friendlyField[positionAttackedRow][positionAttackedColumn] = 2; // change to hit water
 					isPlayersTurn = true; //
-					System.out.println(role + "'s turn now");
+					//System.out.println(role + "'s turn now");
 					break;
 				}
 				case 1:
@@ -471,6 +608,15 @@ public class SpielTestNew2 {
 					friendlyField[positionAttackedRow][positionAttackedColumn] = 3; // change to hit ship part
 					isPlayersTurn = false;
 					// System.out.println("NOT " + role +"'s turn now");
+
+					boolean isAttackedShipDestroyed = isShipCompletelyDestroyed(positionAttackedRow,
+							positionAttackedColumn);
+					if (isAttackedShipDestroyed) {
+						System.out.println("ship is completely destroyed");
+						attackResult = 2;
+						markDestroyedShip(positionAttackedRow, positionAttackedColumn);
+					}
+
 					break;
 				}
 
@@ -500,7 +646,6 @@ public class SpielTestNew2 {
 
 				int attackAnswerNumber = Integer.parseInt(responseList[1]);
 
-				// TODO for case 2 (Schieff gesunken)
 				switch (attackAnswerNumber) {
 				case 0:
 				// Wasser geschossen
@@ -521,6 +666,16 @@ public class SpielTestNew2 {
 					// System.out.println("Still " +role+"'s turn");
 					break;
 				}
+				case 2:
+				// Schiff gesunken
+				{
+					enemyField[lastPositionAttacked[0]][lastPositionAttacked[1]] = 2;
+					isPlayersTurn = true;
+
+					markDestroyedEnemyShip(lastPositionAttacked[0], lastPositionAttacked[1]);
+
+					break;
+				}
 
 				}
 
@@ -528,8 +683,12 @@ public class SpielTestNew2 {
 				spawnFriendlyField();
 				spawnEnemyField();
 
-				// check if player won: count of hit ships (value = 2) is totalShipPartsCount
-				if (countValueOcurrencesInArray(enemyField, 2) == totalShipPartsCount) {
+				// check if player won: count of ships parts of destroyed ships (value = 4) is
+				// totalShipPartsCount
+				System.out.println(
+						"countValueOcurrencesInArray(enemyField, 3) = " + countValueOcurrencesInArray(enemyField, 3));
+				System.out.println("totalShipPartsCount = " + totalShipPartsCount);
+				if (countValueOcurrencesInArray(enemyField, 3) == totalShipPartsCount) {
 					// System.out.println(role + " won."); isPlayersTurn = false;
 					spawnFriendlyField();
 					spawnEnemyField();
@@ -545,7 +704,7 @@ public class SpielTestNew2 {
 
 	}
 
-	public void runGame() throws IOException {
+	private void runGame() throws IOException {
 
 		// Graphische Oberfläche aufbauen.
 		SwingUtilities.invokeLater(() -> {
@@ -558,19 +717,57 @@ public class SpielTestNew2 {
 
 		// register total number of ship parts
 		totalShipPartsCount = countValueOcurrencesInArray(friendlyField, 1);
-		
+
 		manageSocketConnection();
 
 		managePreparationBeforeBattle();
 
 		manageBattle();
-		
-		 // EOF ins Socket "schreiben" und das Programm explizit beenden // (weil es
-		 // sonst weiterlaufen würde, bis der Benutzer das Hauptfenster // schließt).
-		 this.s.shutdownOutput(); 
-		 System.out.println("Connection closed.");
-		 System.exit(0);
-		 
+
+		// EOF ins Socket "schreiben" und das Programm explizit beenden // (weil es
+		// sonst weiterlaufen würde, bis der Benutzer das Hauptfenster // schließt).
+		this.s.shutdownOutput();
+		System.out.println("Connection closed.");
+		System.exit(0);
+
+	}
+
+	public static void main(String[] args) {
+		try {
+			// Create client player for testing purposes
+			final int port = 50000;
+			Socket s = new Socket("localhost", port);
+
+			BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+			Writer out = new OutputStreamWriter(s.getOutputStream());
+			
+			// get answer from server
+			String line0 = in.readLine(); // read line from socket
+			System.out.println("received line0: " + line0);
+			
+			// send done
+			out.write(String.format("done %n"));
+			out.flush();
+
+			// get answer from server
+			String line1 = in.readLine(); // read line from socket
+			System.out.println("received line1: " + line1);
+			
+			// send done
+			out.write(String.format("done %n"));
+			out.flush();
+			
+			System.out.println("Client side message: game can start");
+			
+			int[][] field = new int[][] { { 1, 1, 1, 1, 1 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 },
+					{ 0, 0, 0, 0, 0 } };
+			new SpielTestNew2(field, s).start();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 }

@@ -69,6 +69,8 @@ class Menu {
 			System.out.println("Knopf gedrückt: Gegen anderen Speieler spielen");
 
 			frame.setVisible(false); // this will close current login box window
+			
+			// TODO redirect to Server finder
 
 		});
 		frame.add(buttonGegenSpieler);
