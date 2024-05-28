@@ -1,16 +1,15 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 
 import Components.MenuBar;
 
 // Erstes Beispiel zur Verwendung von (AWT und) Swing.
-class SpielFinden {
+class SpielFindenBackup {
 	private JFrame menuFrame;
 	
     // Graphische Oberfläche aufbauen und anzeigen.
-    public SpielFinden (JFrame menuFrame) {
+    public SpielFindenBackup (JFrame menuFrame) {
     	this.menuFrame = menuFrame;
     	
     	showUI();
@@ -29,9 +28,6 @@ class SpielFinden {
     	
     	// set Minimum size
     	frame.setMinimumSize(new Dimension(1200, 500));
-    	
-    	// Center the window on the screen
-    	frame.setLocationRelativeTo(null);
 
     	// Der Inhalt des Fensters soll von einem BoxLayout-Manager
     	// verwaltet werden, der seine Bestandteile vertikal (von
@@ -40,27 +36,6 @@ class SpielFinden {
 
     	// Dehnbaren Zwischenraum am oberen Rand hinzufügen.
     	frame.add(Box.createGlue());
-    	
-    	
-    	// TODO remove later: Table test data
-        String[] columnNames = {"Wählen", "IP-Adresse"};
-        Object[][] data = {
-                {false, "192.0.2.0"},
-                {false, "192.0.2.1"},
-                {false, "192.0.2.3"}
-        };
-    	
-        // Table model and JTable
-        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
-            @Override
-            public Class<?> getColumnClass(int columnIndex) {
-                if (columnIndex == 0) {
-                    return Boolean.class;
-                } else {
-                    return String.class;
-                }
-            }
-        };
 
     	// Darunter ein horizontal zentriertes "Etikett" (JLabel)
     	// hinzufügen.

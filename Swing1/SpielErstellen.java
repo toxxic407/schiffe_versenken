@@ -18,8 +18,7 @@ class SpielErstellen {
 	private JTextField textFielGroesse4;
 	private JTextField textFielGroesse3;
 	private JTextField textFielGroesse2;
-	
-	
+
 	private boolean isStringAnInteger(String text) {
 		try {
 			int number = Integer.parseInt(text);
@@ -33,52 +32,43 @@ class SpielErstellen {
 		// manage field size
 		if (isStringAnInteger(txtfldSize.getText())) {
 			this.fieldSize = Integer.parseInt(txtfldSize.getText());
-			
+
+		} else {
+			JOptionPane.showMessageDialog(frame, "Feldgröße soll Integer sein!", "Fehler", JOptionPane.ERROR_MESSAGE);
 		}
-		else {
-			 JOptionPane.showMessageDialog(frame, "Feldgröße soll Integer sein!",
-		               "Fehler", JOptionPane.ERROR_MESSAGE);
-		}
-		
-		//manage number of ships size 5
+
+		// manage number of ships size 5
 		if (isStringAnInteger(textFielGroesse5.getText())) {
 			this.anzahlSchiffeGroesse5 = Integer.parseInt(textFielGroesse5.getText());
+		} else {
+			JOptionPane.showMessageDialog(frame, "Anzahl der Schiffe (Größe 5) soll Integer sein!", "Fehler",
+					JOptionPane.ERROR_MESSAGE);
 		}
-		else {
-			 JOptionPane.showMessageDialog(frame, "Anzahl der Schiffe (Größe 5) soll Integer sein!",
-		               "Fehler", JOptionPane.ERROR_MESSAGE);
-		}
-		
-		//manage number of ships size 4
+
+		// manage number of ships size 4
 		if (isStringAnInteger(textFielGroesse4.getText())) {
 			this.anzahlSchiffeGroesse4 = Integer.parseInt(textFielGroesse4.getText());
+		} else {
+			JOptionPane.showMessageDialog(frame, "Anzahl der Schiffe (Größe 4) soll Integer sein!", "Fehler",
+					JOptionPane.ERROR_MESSAGE);
 		}
-		else {
-			 JOptionPane.showMessageDialog(frame, "Anzahl der Schiffe (Größe 4) soll Integer sein!",
-		               "Fehler", JOptionPane.ERROR_MESSAGE);
-		}
-		
-		
-		//manage number of ships size 3
+
+		// manage number of ships size 3
 		if (isStringAnInteger(textFielGroesse3.getText())) {
 			this.anzahlSchiffeGroesse3 = Integer.parseInt(textFielGroesse3.getText());
+		} else {
+			JOptionPane.showMessageDialog(frame, "Anzahl der Schiffe (Größe 3) soll Integer sein!", "Fehler",
+					JOptionPane.ERROR_MESSAGE);
 		}
-		else {
-			 JOptionPane.showMessageDialog(frame, "Anzahl der Schiffe (Größe 3) soll Integer sein!",
-		               "Fehler", JOptionPane.ERROR_MESSAGE);
-		}
-		
-		//manage number of ships size 2
+
+		// manage number of ships size 2
 		if (isStringAnInteger(textFielGroesse2.getText())) {
 			this.anzahlSchiffeGroesse2 = Integer.parseInt(textFielGroesse2.getText());
+		} else {
+			JOptionPane.showMessageDialog(frame, "Anzahl der Schiffe (Größe 2) soll Integer sein!", "Fehler",
+					JOptionPane.ERROR_MESSAGE);
 		}
-		else {
-			 JOptionPane.showMessageDialog(frame, "Anzahl der Schiffe (Größe 2) soll Integer sein!",
-		               "Fehler", JOptionPane.ERROR_MESSAGE);
-		}
-		
 
-		
 	}
 
 	// Graphische Oberfläche aufbauen und anzeigen.
@@ -93,6 +83,9 @@ class SpielErstellen {
 
 		// set Minimum size
 		frame.setMinimumSize(new Dimension(1200, 500));
+
+		// Center the window on the screen
+		frame.setLocationRelativeTo(null);
 
 		// Der Inhalt des Fensters soll von einem BoxLayout-Manager
 		// verwaltet werden, der seine Bestandteile vertikal (von
@@ -132,7 +125,7 @@ class SpielErstellen {
 			panel.setLayout(new GridLayout(3, 2, 10, 50));
 			{
 				JLabel labelSize = new JLabel("Breite un Höhe");
-				txtfldSize = new JTextField("5");		// 10
+				txtfldSize = new JTextField("5"); // 10
 				txtfldSize.setMaximumSize(new Dimension(50, txtfldSize.getPreferredSize().height));
 
 				panel.add(labelSize);
@@ -144,16 +137,16 @@ class SpielErstellen {
 			panel2.setLayout(new GridLayout(5, 2, 5, 10));
 			{
 				JLabel labelGroesse5 = new JLabel("Größe \"5\"");
-				textFielGroesse5 = new JTextField("1");		// 1
+				textFielGroesse5 = new JTextField("1"); // 1
 				textFielGroesse5.setMaximumSize(new Dimension(200, textFielGroesse5.getPreferredSize().height));
 				JLabel labelGroesse4 = new JLabel("Größe \"4\"");
-				 textFielGroesse4 = new JTextField("0");	// 3
+				textFielGroesse4 = new JTextField("0"); // 3
 				textFielGroesse4.setMaximumSize(new Dimension(200, textFielGroesse4.getPreferredSize().height));
 				JLabel labelGroesse3 = new JLabel("Größe \"3\"");
-				textFielGroesse3 = new JTextField("0");		// 2
+				textFielGroesse3 = new JTextField("0"); // 2
 				textFielGroesse3.setMaximumSize(new Dimension(200, textFielGroesse3.getPreferredSize().height));
 				JLabel labelGroesse2 = new JLabel("Größe \"2\"");
-				textFielGroesse2 = new JTextField("0");		// 1
+				textFielGroesse2 = new JTextField("0"); // 1
 				textFielGroesse2.setMaximumSize(new Dimension(200, textFielGroesse2.getPreferredSize().height));
 
 				panel2.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
@@ -203,16 +196,15 @@ class SpielErstellen {
 				System.out.println("Computer will play");
 			}
 
-			// set field setting 
+			// set field setting
 			setFieldSetting();
-			
+
 			frame.setVisible(false);
 
 			// go to SchiffeAufstellen
-			new SchiffeAufstellen(
-					role, menuFrame, playAgainstComputer, botWillPlay, this.fieldSize, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4, 
-					this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2
-					);
+			new SchiffeAufstellen(role, menuFrame, playAgainstComputer, botWillPlay, this.fieldSize,
+					this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4, this.anzahlSchiffeGroesse3,
+					this.anzahlSchiffeGroesse2);
 
 		});
 		frame.add(buttonSpielErstellen);

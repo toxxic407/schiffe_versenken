@@ -213,7 +213,7 @@ public class SchiffeAufstellen {
 
 	private void placeAllShips() {
 		this.field = new int[this.fieldSize][this.fieldSize];
-		
+
 		placeShips(anzahlSchiffeGroesse5, 5);
 		placeShips(anzahlSchiffeGroesse4, 4);
 		placeShips(anzahlSchiffeGroesse3, 3);
@@ -306,8 +306,8 @@ public class SchiffeAufstellen {
 
 			// If Local player is Bot
 			if (this.botWillPlayForMe) {
-				PlayerBot player = new PlayerBot(this.menuFrame, this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
-						this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
+				PlayerBot player = new PlayerBot(this.menuFrame, this.field, this.anzahlSchiffeGroesse5,
+						this.anzahlSchiffeGroesse4, this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
 				player.start();
 
 				new Thread(() -> {
@@ -317,8 +317,8 @@ public class SchiffeAufstellen {
 			} else // If Local player is NOT Bot
 
 			{
-				Player player = new Player(this.menuFrame, this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
-						this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
+				Player player = new Player(this.menuFrame, this.field, this.anzahlSchiffeGroesse5,
+						this.anzahlSchiffeGroesse4, this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
 				player.start();
 
 				new Thread(() -> {
@@ -361,6 +361,9 @@ public class SchiffeAufstellen {
 		// set Minimum size
 		mainFrame.setMinimumSize(new Dimension(1200, 500));
 
+		// Center the window on the screen
+		this.mainFrame.setLocationRelativeTo(null);
+
 		// Der Inhalt des Fensters soll von einem BoxLayout-Manager
 		// verwaltet werden, der seine Bestandteile vertikal (von
 		// oben nach unten) anordnet.
@@ -385,17 +388,15 @@ public class SchiffeAufstellen {
 		mainFrame.add(fieldPanel);
 
 		mainFrame.add(Box.createVerticalStrut(50));
-		
+
 		JButton buttonSuffleShips = new JButton("Schiffe neu positionieren");
 		buttonSuffleShips.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonSuffleShips.addActionListener((e) -> {
 			System.out.println("Knopf gedrückt: Schiffe neu positionieren");
-			
-			
 
 			// place ships in random positions
 			placeAllShips();
-			
+
 			// respawn field
 			spawnField();
 

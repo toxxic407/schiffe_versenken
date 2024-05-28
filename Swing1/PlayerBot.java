@@ -42,8 +42,8 @@ public class PlayerBot {
 	private boolean isOpponentReady = false;
 	private Socket s;
 
-	public PlayerBot(JFrame menuFrame, int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
-			int anzahlSchiffeGroesse2) {
+	public PlayerBot(JFrame menuFrame, int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4,
+			int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
 		/*
 		 * Constructor for Server role
 		 */
@@ -56,7 +56,7 @@ public class PlayerBot {
 		this.anzahlSchiffeGroesse2 = anzahlSchiffeGroesse2;
 
 		this.enemyField = new int[field.length][field.length];
-		
+
 		this.menuFrame = menuFrame;
 
 		System.out.println(Arrays.deepToString(enemyField));
@@ -74,7 +74,7 @@ public class PlayerBot {
 		this.s = s;
 
 		this.enemyField = new int[field.length][field.length];
-		
+
 		this.menuFrame = menuFrame;
 
 		System.out.println(Arrays.deepToString(enemyField));
@@ -220,6 +220,9 @@ public class PlayerBot {
 		// X-Knopfs in Windows) soll das Programm beendet werden.
 		this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+		// Center the window on the screen
+		this.mainFrame.setLocationRelativeTo(null);
+
 		// Der Inhalt des Fensters soll von einem BoxLayout-Manager
 		// verwaltet werden, der seine Bestandteile vertikal (von
 		// oben nach unten) anordnet.
@@ -254,7 +257,7 @@ public class PlayerBot {
 
 		// Add the fieldsPanel to the main frame
 		this.mainFrame.add(fieldsPanel);
-		
+
 		if (menuFrame != null) {
 			// Menüzeile (JMenuBar) erzeugen und einzelne Menüs (JMenu)
 			// mit Menüpunkten (JMenuItem) hinzufügen.
@@ -266,7 +269,6 @@ public class PlayerBot {
 			// Menüzeile zum Fenster hinzufügen.
 			mainFrame.setJMenuBar(menuBar);
 		}
-
 
 		// Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
 		// und das Fenster anzeigen (setVisible).
@@ -796,7 +798,7 @@ public class PlayerBot {
 
 			int[][] field = new int[][] { { 1, 1, 1, 1, 1 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 },
 					{ 0, 0, 0, 0, 0 } };
-			new PlayerBot(field, s).start();
+			new PlayerBot(null, field, s).start();
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

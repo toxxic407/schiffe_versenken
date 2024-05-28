@@ -53,6 +53,9 @@ class Menu {
 
 		// set Minimum size
 		frame.setMinimumSize(new Dimension(1200, 500));
+		
+		// Center the window on the screen
+    	frame.setLocationRelativeTo(null);
 
 		// Der Inhalt des Fensters soll von einem BoxLayout-Manager
 		// verwaltet werden, der seine Bestandteile vertikal (von
@@ -70,7 +73,9 @@ class Menu {
 
 			frame.setVisible(false); // this will close current login box window
 			
-			// TODO redirect to Server finder
+			// TODO redirect to Server finder / SpielFinden
+			new SpielFinden(frame);
+			
 
 		});
 		frame.add(buttonGegenSpieler);

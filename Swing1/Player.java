@@ -1,6 +1,9 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+
+import Components.MenuBar;
+
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -29,6 +32,7 @@ public class Player {
 	private JPanel enemyGridPanel = new JPanel();;
 	private JPanel friendlyGridPanel = new JPanel();;
 	private JFrame mainFrame;
+	private JFrame menuFrame;
 	private JPanel enemyPanel;
 	private JPanel friendlyPanel;
 	private int totalShipPartsCount;
@@ -38,7 +42,7 @@ public class Player {
 	public Socket s;
 	private int attacksSent = 0;
 
-	public Player(int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
+	public Player(JFrame menuFrame, int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
 			int anzahlSchiffeGroesse2) {
 		/*
 		 * Constructor for Server role
@@ -52,13 +56,15 @@ public class Player {
 		this.anzahlSchiffeGroesse2 = anzahlSchiffeGroesse2;
 
 		this.enemyField = new int[field.length][field.length];
+		
+		this.menuFrame = menuFrame;
 
 		System.out.println(Arrays.deepToString(enemyField));
 		System.out.println(Arrays.deepToString(friendlyField));
 
 	}
 
-	public Player(int[][] field, Socket s) {
+	public Player(JFrame menuFrame, int[][] field, Socket s) {
 		/*
 		 * Constructor for Client role
 		 */
@@ -68,6 +74,8 @@ public class Player {
 		this.s = s;
 
 		this.enemyField = new int[field.length][field.length];
+		
+		this.menuFrame = menuFrame;
 
 		System.out.println(Arrays.deepToString(enemyField));
 		System.out.println(Arrays.deepToString(friendlyField));
@@ -213,6 +221,9 @@ public class Player {
 		// Beim Schließen des Fensters (z. B. durch Drücken des
 		// X-Knopfs in Windows) soll das Programm beendet werden.
 		this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		// Center the window on the screen
+		this.mainFrame.setLocationRelativeTo(null);
 
 		// Der Inhalt des Fensters soll von einem BoxLayout-Manager
 		// verwaltet werden, der seine Bestandteile vertikal (von
@@ -248,6 +259,18 @@ public class Player {
 
 		// Add the fieldsPanel to the main frame
 		this.mainFrame.add(fieldsPanel);
+		
+		if (menuFrame != null) {
+			// Menüzeile (JMenuBar) erzeugen und einzelne Menüs (JMenu)
+			// mit Menüpunkten (JMenuItem) hinzufügen.
+			// Jeder Menüpunkt ist eigentlich ein Knopf, dem wie oben
+			// eine anonyme Funktion zugeordnet werden kann.
+			// (Hier exemplarisch nur für einen Menüpunkt.)
+			JMenuBar menuBar = new MenuBar(mainFrame, menuFrame);
+
+			// Menüzeile zum Fenster hinzufügen.
+			mainFrame.setJMenuBar(menuBar);
+		}
 
 		// Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
 		// und das Fenster anzeigen (setVisible).
@@ -772,7 +795,7 @@ public class Player {
 
 			int[][] field = new int[][] { { 1, 1, 1, 1, 1 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 },
 					{ 0, 0, 0, 0, 0 } };
-			new Player(field, s).start();
+			new Player(null, field, s).start();
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
