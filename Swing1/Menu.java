@@ -8,6 +8,13 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 // Erstes Beispiel zur Verwendung von (AWT und) Swing.
 class Menu {
+	
+	// TODO close sockets when game ends for all 3 player types. So that other games can be created
+	// TODO close socket when one of the users disconnects 
+	// TODO save and load game
+	// TODO relocate ships manually
+	// TODO look for bugs
+	
 	// Graphische Oberfläche aufbauen und anzeigen.
 
 	/*

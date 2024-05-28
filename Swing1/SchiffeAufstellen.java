@@ -43,10 +43,11 @@ public class SchiffeAufstellen {
 	private int anzahlSchiffeGroesse4;
 	private int anzahlSchiffeGroesse3;
 	private int anzahlSchiffeGroesse2;
-	private int sizeOfShipToRelocate = -1;
-	private boolean shipToRelocateShouldBeVertical = false;
-	private int startXShipToRelocate;
-	private int startYShipToRelocate;
+//	private int sizeOfShipToRelocate = -1;
+//	private boolean shipToRelocateShouldBeVertical = false;
+	private boolean relocationOfShipMode = false;
+//	private int startXShipToRelocate;
+//	private int startYShipToRelocate;
 	private Socket s;
 	private boolean isClientFieldSizeDone;
 	private boolean areClientFieldShipsDone;
@@ -74,9 +75,7 @@ public class SchiffeAufstellen {
 		/*
 		 * Constructor for Client role
 		 */
-
-		// TODO when role is Client, create socket connection and get information from
-		// Server
+		// Client
 		this.role = "Client";
 		this.menuFrame = menuFrame;
 		this.playAgainstComputer = playAgainstComputer;
@@ -185,6 +184,87 @@ public class SchiffeAufstellen {
 		}
 	}
 
+	private void spawnFieldWhenRelocatingShip(boolean shipToRelocateShouldBeVertical, int sizeOfShipToRelocate) {
+		fieldPanel.remove(fieldGridPanel);
+		fieldGridPanel.removeAll();
+		fieldGridPanel = new JPanel();
+
+		fieldGridPanel.setLayout(new GridLayout(fieldSize, fieldSize));
+
+		// iterate over field and display buttons accordingly
+		for (int i = 0; i < fieldSize; i++) {
+			int row = i;
+
+			for (int j = 0; j < fieldSize; j++) {
+				int column = j;
+				JButton button = new JButton(row + "," + column);
+				button.setPreferredSize(new Dimension(50, 50));
+
+				// if button is NOT in valid position to relocate ship, disable it. If it is in
+				// valid position, add method to place the ship there
+				boolean canShipBeRelocatedHere = canPlaceShip(row, column, sizeOfShipToRelocate, !shipToRelocateShouldBeVertical);
+				
+				if (!canShipBeRelocatedHere) {
+					button.setEnabled(false);
+				} else {
+
+					button.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							relocationOfShipMode = false; // deactivate relocation mode
+							placeShip(row, column, sizeOfShipToRelocate, !shipToRelocateShouldBeVertical, 1);
+							spawnField(); // spawn field as normal
+
+						}
+					});
+
+				}
+
+				// change color of button according to value in the field (ship part or water)
+				if (field[row][column] == 0 && canShipBeRelocatedHere) {
+					// wasser
+					button.setBackground(Color.blue);
+				} else if (field[row][column] == 0) {
+					button.setBackground(Color.red); // wasser, aber Ship can NOT be located here
+				}
+
+				if (field[row][column] == 1) {
+					// Schiffteil
+					button.setBackground(Color.black);
+				}
+
+				fieldGridPanel.add(button);
+			}
+		}
+
+		fieldPanel.add(fieldGridPanel);
+
+		// Revalidate and repaint the mainFrame to reflect changes
+		fieldPanel.revalidate();
+		fieldPanel.repaint();
+	}
+
+	private void manageRelocateShipManually(int row, int column) {
+
+		this.relocationOfShipMode = true;
+
+		int[] shipInfo = getShipInfo(row, column);
+		/*
+		 * for (int k = 0; k < shipInfo.length; k++) { System.out.println(shipInfo[k]);
+		 * }
+		 */
+		int sizeOfShipToRelocate = shipInfo[0];
+		boolean shipToRelocateShouldBeVertical = shipInfo[1] == 1;
+		int startXShipToRelocate = shipInfo[2];
+		int startYShipToRelocate = shipInfo[3];
+		removeShip(shipInfo[2], shipInfo[3], shipToRelocateShouldBeVertical, sizeOfShipToRelocate);
+
+		// TODO create method spawn field when relocating. It should enable only the
+		// buttons where it is possible to relocate that ship size in that position
+		spawnFieldWhenRelocatingShip(shipToRelocateShouldBeVertical, sizeOfShipToRelocate);
+
+	}
+
 	private void spawnField() {
 		fieldPanel.remove(fieldGridPanel);
 		fieldGridPanel.removeAll();
@@ -220,29 +300,15 @@ public class SchiffeAufstellen {
 
 				// add functionality to change the position of the ship, on the buttons that
 				// have a ship part.
-				if (sizeOfShipToRelocate == -1 && field[row][column] == 1) {
+				if (relocationOfShipMode == false && field[row][column] == 1) {
 					button.addActionListener(new ActionListener() {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							int[] shipInfo = getShipInfo(row, column);
-							/*
-							 * for (int k = 0; k < shipInfo.length; k++) { System.out.println(shipInfo[k]);
-							 * }
-							 */
-							sizeOfShipToRelocate = shipInfo[0];
-							shipToRelocateShouldBeVertical = shipInfo[1] == 1;
-							startXShipToRelocate = shipInfo[2];
-							startYShipToRelocate = shipInfo[3];
-							removeShip(shipInfo[2], shipInfo[3], shipToRelocateShouldBeVertical, sizeOfShipToRelocate);
+							manageRelocateShipManually(row, column);
 
 						}
 					});
-				} else if (sizeOfShipToRelocate > 0 && field[row][column] == 0) {
-					// TODO add functionality to the button to set the new position of the ship.
-					// Show a preview of where would the ship be located (value = 2)
-					// remove the preview when user stops hovering on the button
-
 				}
 
 				fieldGridPanel.add(button);
@@ -256,26 +322,28 @@ public class SchiffeAufstellen {
 		fieldPanel.repaint();
 		// fieldPanel.setVisible(true);
 	}
+	
 
 	// Method to check if the new position is valid
-	private boolean isValidPosition(int row, int column, boolean vertical, int size) {
-		if (vertical) {
-			if (row + size > fieldSize)
-				return false; // Check boundaries
-			for (int i = 0; i < size; i++) {
-				if (field[row + i][column] != 0)
-					return false; // Check for collisions
-			}
-		} else {
-			if (column + size > fieldSize)
-				return false; // Check boundaries
-			for (int i = 0; i < size; i++) {
-				if (field[row][column + i] != 0)
-					return false; // Check for collisions
-			}
-		}
-		return true;
-	}
+//	private boolean isValidPosition(int row, int column, boolean vertical, int size) {
+//		if (vertical) {
+//			if (row + size > fieldSize)
+//				return false; // Check boundaries
+//			for (int i = 0; i < size; i++) {
+//				if (field[row + i][column] != 0)
+//					return false; // Check for collisions
+//			}
+//		} else {
+//			if (column + size > fieldSize)
+//				return false; // Check boundaries
+//			for (int i = 0; i < size; i++) {
+//				if (field[row][column + i] != 0)
+//					return false; // Check for collisions
+//			}
+//		}
+//		return true;
+//	}
+	
 
 	private int[] getShipInfo(int x, int y) {
 		int size = 0;
@@ -322,7 +390,6 @@ public class SchiffeAufstellen {
 			}
 		}
 
-		spawnField(); // Refresh the field to reflect changes
 	}
 
 	private void placeAllShips() {
@@ -496,6 +563,8 @@ public class SchiffeAufstellen {
 		buttonSuffleShips.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonSuffleShips.addActionListener((e) -> {
 			System.out.println("Knopf gedrückt: Schiffe neu positionieren");
+
+			this.relocationOfShipMode = false; // deactivate relocation mode
 
 			// place ships in random positions
 			placeAllShips();
