@@ -60,7 +60,7 @@ public class PlayerBotNoUI {
 		try {
 
 			int[] positionToAttackNow = new int[] { indexToAttackNext[0], indexToAttackNext[1] };
-			lastPositionAttacked = indexToAttackNext; // save last attacked index
+			lastPositionAttacked = indexToAttackNext.clone(); // save last attacked index
 
 			// Strategy attack from right to left
 
@@ -99,6 +99,7 @@ public class PlayerBotNoUI {
 	}
 
 	private void placeAllShips() {
+		this.friendlyField = new int[this.fieldSize][this.fieldSize];
 		placeShips(anzahlSchiffeGroesse5, 5);
 		placeShips(anzahlSchiffeGroesse4, 4);
 		placeShips(anzahlSchiffeGroesse3, 3);
@@ -432,7 +433,6 @@ public class PlayerBotNoUI {
 
 			}
 		}
-		System.out.println(Arrays.deepToString(enemyField));
 	}
 
 	private void manageBattle() throws IOException {
@@ -506,6 +506,8 @@ public class PlayerBotNoUI {
 			{
 
 				int attackAnswerNumber = Integer.parseInt(responseList[1]);
+				
+				System.out.println("Last possition attacked: " + Arrays.toString(lastPositionAttacked));
 
 				switch (attackAnswerNumber) {
 				case 0: // Wasser geschossen
@@ -538,6 +540,8 @@ public class PlayerBotNoUI {
 				}
 
 				// check if player won: count of hit ships (value = 2) is totalShipPartsCount
+				System.out.print("State of enemy field: ");
+				System.out.println(Arrays.deepToString(enemyField));
 				System.out.println(
 						"countValueOcurrencesInArray(enemyField, 3) = " + countValueOcurrencesInArray(enemyField, 3));
 				System.out.println("totalShipPartsCount = " + totalShipPartsCount);
