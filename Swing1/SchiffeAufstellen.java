@@ -306,7 +306,7 @@ public class SchiffeAufstellen {
 
 			// If Local player is Bot
 			if (this.botWillPlayForMe) {
-				PlayerBot player = new PlayerBot(this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
+				PlayerBot player = new PlayerBot(this.menuFrame, this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
 						this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
 				player.start();
 
@@ -317,7 +317,7 @@ public class SchiffeAufstellen {
 			} else // If Local player is NOT Bot
 
 			{
-				Player player = new Player(this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
+				Player player = new Player(this.menuFrame, this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
 						this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
 				player.start();
 

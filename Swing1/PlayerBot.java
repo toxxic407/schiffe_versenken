@@ -1,6 +1,9 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+
+import Components.MenuBar;
+
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -30,6 +33,7 @@ public class PlayerBot {
 	private JPanel enemyGridPanel = new JPanel();;
 	private JPanel friendlyGridPanel = new JPanel();;
 	private JFrame mainFrame;
+	private JFrame menuFrame;
 	private JPanel enemyPanel;
 	private JPanel friendlyPanel;
 	private int totalShipPartsCount;
@@ -38,7 +42,7 @@ public class PlayerBot {
 	private boolean isOpponentReady = false;
 	private Socket s;
 
-	public PlayerBot(int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
+	public PlayerBot(JFrame menuFrame, int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
 			int anzahlSchiffeGroesse2) {
 		/*
 		 * Constructor for Server role
@@ -52,13 +56,15 @@ public class PlayerBot {
 		this.anzahlSchiffeGroesse2 = anzahlSchiffeGroesse2;
 
 		this.enemyField = new int[field.length][field.length];
+		
+		this.menuFrame = menuFrame;
 
 		System.out.println(Arrays.deepToString(enemyField));
 		System.out.println(Arrays.deepToString(friendlyField));
 
 	}
 
-	public PlayerBot(int[][] field, Socket s) {
+	public PlayerBot(JFrame menuFrame, int[][] field, Socket s) {
 		/*
 		 * Constructor for Client role
 		 */
@@ -68,6 +74,8 @@ public class PlayerBot {
 		this.s = s;
 
 		this.enemyField = new int[field.length][field.length];
+		
+		this.menuFrame = menuFrame;
 
 		System.out.println(Arrays.deepToString(enemyField));
 		System.out.println(Arrays.deepToString(friendlyField));
@@ -246,6 +254,19 @@ public class PlayerBot {
 
 		// Add the fieldsPanel to the main frame
 		this.mainFrame.add(fieldsPanel);
+		
+		if (menuFrame != null) {
+			// Menüzeile (JMenuBar) erzeugen und einzelne Menüs (JMenu)
+			// mit Menüpunkten (JMenuItem) hinzufügen.
+			// Jeder Menüpunkt ist eigentlich ein Knopf, dem wie oben
+			// eine anonyme Funktion zugeordnet werden kann.
+			// (Hier exemplarisch nur für einen Menüpunkt.)
+			JMenuBar menuBar = new MenuBar(mainFrame, menuFrame);
+
+			// Menüzeile zum Fenster hinzufügen.
+			mainFrame.setJMenuBar(menuBar);
+		}
+
 
 		// Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
 		// und das Fenster anzeigen (setVisible).
