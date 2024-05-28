@@ -8,7 +8,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.Socket;
 import java.util.Random;
 
@@ -24,6 +28,8 @@ import javax.swing.SwingUtilities;
 import Components.MenuBar;
 
 public class SchiffeAufstellen {
+	private BufferedReader in; // Verpackung des Socket-Eingabestroms.
+	private Writer out; // Verpackung des Socket-Ausgabestroms.
 	private String role;
 	private JFrame mainFrame;
 	private JFrame menuFrame;
@@ -42,33 +48,141 @@ public class SchiffeAufstellen {
 	private int startXShipToRelocate;
 	private int startYShipToRelocate;
 	private Socket s;
+	private boolean isClientFieldSizeDone;
+	private boolean areClientFieldShipsDone;
 
-	public SchiffeAufstellen(String role, JFrame menuFrame, boolean playAgainstComputer, boolean botWillPlayForMe,
-			int fieldSize, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
-			int anzahlSchiffeGroesse2) {
+	public SchiffeAufstellen(JFrame menuFrame, boolean playAgainstComputer, int fieldSize, int anzahlSchiffeGroesse5,
+			int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
 		// set instance variables
-		this.role = role;
+		this.role = "Server";
+		this.menuFrame = menuFrame;
+		this.playAgainstComputer = playAgainstComputer;
 
-		if (role.equals("Server")) {
-			this.menuFrame = menuFrame;
-			this.playAgainstComputer = playAgainstComputer;
-			this.botWillPlayForMe = botWillPlayForMe;
-			this.fieldSize = fieldSize;
+		this.fieldSize = fieldSize;
 
-			this.field = new int[fieldSize][fieldSize];
-			this.anzahlSchiffeGroesse5 = anzahlSchiffeGroesse5;
-			this.anzahlSchiffeGroesse4 = anzahlSchiffeGroesse4;
-			this.anzahlSchiffeGroesse3 = anzahlSchiffeGroesse3;
-			this.anzahlSchiffeGroesse2 = anzahlSchiffeGroesse2;
-
-		} else {
-			// TODO when role is Client, create socket connection and get information from
-			// Server
-
-		}
+		this.field = new int[fieldSize][fieldSize];
+		this.anzahlSchiffeGroesse5 = anzahlSchiffeGroesse5;
+		this.anzahlSchiffeGroesse4 = anzahlSchiffeGroesse4;
+		this.anzahlSchiffeGroesse3 = anzahlSchiffeGroesse3;
+		this.anzahlSchiffeGroesse2 = anzahlSchiffeGroesse2;
 
 		showUI();
 
+	}
+
+	public SchiffeAufstellen(JFrame menuFrame, boolean playAgainstComputer) {
+		/*
+		 * Constructor for Client role
+		 */
+
+		// TODO when role is Client, create socket connection and get information from
+		// Server
+		this.role = "Client";
+		this.menuFrame = menuFrame;
+		this.playAgainstComputer = playAgainstComputer;
+
+		manageSocketConnection();
+
+		askForFieldInformation();
+
+		showUI();
+
+	}
+
+	private void manageSocketConnection() {
+		// Verwendete Portnummer (vgl. Server.java).
+		final int port = 50000;
+
+		boolean isConnectionSuccesfull = false;
+
+		while (!isConnectionSuccesfull) {
+			try {
+				Socket s = new Socket("localhost", port);
+				this.s = s;
+
+				// Ein- und Ausgabestrom des Sockets ermitteln
+				// und als BufferedReader bzw. Writer verpacken.
+				this.in = new BufferedReader(new InputStreamReader(this.s.getInputStream()));
+				this.out = new OutputStreamWriter(this.s.getOutputStream());
+
+				isConnectionSuccesfull = true;
+
+			} catch (Exception e) {
+				continue;
+			}
+
+		}
+
+		System.out.println("Connection established.");
+	}
+
+	static int search(String[] arr, String s) {
+		/* Returns count of occurrences of string s in arr[] */
+		int counter = 0;
+		for (int j = 0; j < arr.length; j++)
+
+			if (s.equals(arr[j]))
+				counter++;
+
+		return counter;
+	}
+
+	private void askForFieldInformation() {
+		// Preparation before battle
+		// get field size
+		while (!isClientFieldSizeDone) {
+			try {
+				System.out.println("Waiting for field size...");
+				String line;
+
+				line = in.readLine(); // read line from socket
+				System.out.println("received: " + line);
+				String[] responseList = line.split(" "); // split line based on whitespace
+
+				if (responseList[0].equals("size")) {
+					this.fieldSize = Integer.parseInt(responseList[1]);
+
+					isClientFieldSizeDone = true;
+
+					// answer "done"
+					out.write(String.format("done %n"));
+					out.flush();
+
+					System.out.println("Size recieved correctly, send done response...");
+
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		this.field = new int[fieldSize][fieldSize];
+
+		// get number of each ship size
+		while (!areClientFieldShipsDone) {
+			try {
+				String line = in.readLine(); // read line from socket
+				System.out.println("received: " + line);
+				String[] responseList = line.split(" "); // split line based on whitespace
+
+				if (responseList[0].equals("ships")) {
+					// get number of ship of each size
+					this.anzahlSchiffeGroesse5 = search(responseList, "5");
+					this.anzahlSchiffeGroesse4 = search(responseList, "4");
+					this.anzahlSchiffeGroesse3 = search(responseList, "3");
+					this.anzahlSchiffeGroesse2 = search(responseList, "2");
+
+					areClientFieldShipsDone = true;
+
+					// answer "done"
+					out.write(String.format("done %n"));
+					out.flush();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
 	}
 
 	private void spawnField() {
@@ -298,54 +412,43 @@ public class SchiffeAufstellen {
 	}
 
 	private void manageGameStarter() {
+		// If Local player is Bot
+		if (this.botWillPlayForMe) {
+			if (this.role == "Server") {
+				PlayerBot playerBot = new PlayerBot(this.menuFrame, this.field, this.anzahlSchiffeGroesse5,
+						this.anzahlSchiffeGroesse4, this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
+				playerBot.start();
+
+			} else if (this.role == "Client") {
+				// TODO when player is Client and bot
+				PlayerBot playerBot = new PlayerBot(this.menuFrame, this.field, this.s);
+				playerBot.start();
+			}
+
+		} else // If Local player is NOT Bot
+		{
+			if (this.role == "Server") {
+				Player player = new Player(this.menuFrame, this.field, this.anzahlSchiffeGroesse5,
+						this.anzahlSchiffeGroesse4, this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
+				player.start();
+			} else if (this.role == "Client") {
+				// TODO when player is Client and bot
+				Player player = new Player(this.menuFrame, this.field, this.s);
+				player.start();
+			}
+
+		}
+
 		// When Opponent player is BOT
 		if (this.playAgainstComputer) {
 			// Create Opponent Bot
 			PlayerBotNoUI playerOpponentBot = new PlayerBotNoUI(this.field.length, anzahlSchiffeGroesse5,
 					anzahlSchiffeGroesse4, anzahlSchiffeGroesse3, anzahlSchiffeGroesse2);
 
-			// If Local player is Bot
-			if (this.botWillPlayForMe) {
-				PlayerBot player = new PlayerBot(this.menuFrame, this.field, this.anzahlSchiffeGroesse5,
-						this.anzahlSchiffeGroesse4, this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
-				player.start();
+			new Thread(() -> {
+				playerOpponentBot.start();
+			}).start();
 
-				new Thread(() -> {
-					playerOpponentBot.start();
-				}).start();
-
-			} else // If Local player is NOT Bot
-
-			{
-				Player player = new Player(this.menuFrame, this.field, this.anzahlSchiffeGroesse5,
-						this.anzahlSchiffeGroesse4, this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
-				player.start();
-
-				new Thread(() -> {
-					playerOpponentBot.start();
-				}).start();
-
-			}
-
-		} else // When Opponent player is not computer
-		{
-			// If Local player is Bot
-			if (this.botWillPlayForMe) {
-				if (this.role == "Server") {
-					// TODO when player is server and bot
-
-				} else if (this.role == "Client") {
-					// TODO when player is Client and bot
-				}
-			} else // If Local player is NOT Bot
-			{
-				if (this.role == "Server") {
-					// TODO when player is server and bot
-
-				} else if (this.role == "Client") {
-					// TODO when player is Client and bot
-				}
-			}
 		}
 	}
 
@@ -409,11 +512,33 @@ public class SchiffeAufstellen {
 		JButton buttonSpielErstellen = new JButton("Spiel starten");
 		buttonSpielErstellen.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonSpielErstellen.addActionListener((e) -> {
+
 			System.out.println("Knopf gedrückt: Spiel starten");
 
-			mainFrame.setVisible(false);
+			// ask who will play: computer of bot
 
-			manageGameStarter();
+			String[] options = { "Ich", "Computer" };
+			int result = JOptionPane.showOptionDialog(mainFrame, "Wer wird Spielen?", "Spieler wählen",
+					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, // no custom icon
+					options, // button titles
+					options[0] // default button
+			);
+
+			if (result == JOptionPane.YES_OPTION) {
+				this.botWillPlayForMe = false;
+				System.out.println("Player will play");
+
+			} else if (result == JOptionPane.NO_OPTION) {
+				this.botWillPlayForMe = true;
+				System.out.println("Computer will play");
+			}
+
+			if (result == JOptionPane.YES_OPTION || result == JOptionPane.NO_OPTION) {
+				mainFrame.setVisible(false);
+
+				manageGameStarter();
+			}
+
 		});
 		mainFrame.add(buttonSpielErstellen);
 

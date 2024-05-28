@@ -1,7 +1,11 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -49,12 +53,16 @@ class SpielFinden {
 			System.out.println("Joining game at IP: " + selectedIp);
 
 			// TODO Add logic to join the game using the selected IP address
-			
+			new Thread(() -> {
+				// go to SchiffeAufstellen, start with Client role
+				new SchiffeAufstellen(menuFrame, false);
+
+			}).start();
 
 		} else {
 			// Show a warning message if no game is selected
-			JOptionPane.showMessageDialog(frame, "Please select a game to join.", "No Game Selected",
-					JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(frame, "Bitte wählen Sie ein Spiel aus, an dem Sie teilnehmen möchten.",
+					"Kein Spiel ausgewählt", JOptionPane.WARNING_MESSAGE);
 		}
 	}
 
@@ -90,10 +98,10 @@ class SpielFinden {
 
 		String[] simpleArray = new String[ipsSet.size()];
 		ipsSet.toArray(simpleArray);
-		
+
 		// replace first element of ipsSet with "localhost"
 		simpleArray[0] = "localhost";
-		
+
 		return simpleArray;
 	}
 
@@ -107,9 +115,28 @@ class SpielFinden {
 		 * that it contains the ip of the local machine
 		 */
 
-		Object[][] formatedData = new Object[ipArray.length][2];
+		// if it id not possible to connect to localhost, do not show it
+		int ipArrayLenght = ipArray.length;
+		int firstIndexToShow = 0;
 
-		for (int i = 0; i < ipArray.length; i++) {
+		// TODO check if conection to localhost socket is possible, without connecting
+		// to it
+//		try {
+//			final int port = 50000;
+//
+//			// try to connect to localhost
+//			Socket s = new Socket("localhost", port);
+//
+//		} catch (Exception e) {
+//			System.out.println(
+//					"formatIPAddressesArray(): Not possible to connect to localhost's socket. Excluding from list");
+//			ipArrayLenght--;
+//			firstIndexToShow = 1;
+//		}
+
+		Object[][] formatedData = new Object[ipArrayLenght][2];
+
+		for (int i = firstIndexToShow; i < ipArray.length; i++) {
 			formatedData[i][0] = false;
 			formatedData[i][1] = ipArray[i];
 		}
@@ -279,6 +306,7 @@ class SpielFinden {
 		JButton joinGameButton = new JButton("Spiel beitreten");
 		joinGameButton.addActionListener((e) -> {
 			System.out.println("Knopf gedrückt: Spiel beitreten");
+			frame.setVisible(false);
 			manageJoinGame();
 		});
 
