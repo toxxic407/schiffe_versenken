@@ -172,29 +172,10 @@ class SpielErstellen {
 
 		frame.add(Box.createGlue());
 
-		JButton buttonSpielErstellen = new JButton("Spiel starten");
+		JButton buttonSpielErstellen = new JButton("Schiffe aufstellen");
 		buttonSpielErstellen.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonSpielErstellen.addActionListener((e) -> {
 			System.out.println("Knopf gedrückt: Spiel starten");
-
-			// ask who will play: computer of bot
-			boolean botWillPlay = false;
-
-			String[] options = { "Ich", "Computer" };
-			int result = JOptionPane.showOptionDialog(frame, "Wer wird Spielen?", "Spieler wählen",
-					JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, // no custom icon
-					options, // button titles
-					options[0] // default button
-			);
-
-			if (result == JOptionPane.YES_OPTION) {
-				botWillPlay = false;
-				System.out.println("Player will play");
-
-			} else if (result == JOptionPane.NO_OPTION) {
-				botWillPlay = true;
-				System.out.println("Computer will play");
-			}
 
 			// set field setting
 			setFieldSetting();
@@ -202,7 +183,7 @@ class SpielErstellen {
 			frame.setVisible(false);
 
 			// go to SchiffeAufstellen
-			new SchiffeAufstellen(role, menuFrame, playAgainstComputer, botWillPlay, this.fieldSize,
+			new SchiffeAufstellen(menuFrame, playAgainstComputer, this.fieldSize,
 					this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4, this.anzahlSchiffeGroesse3,
 					this.anzahlSchiffeGroesse2);
 
