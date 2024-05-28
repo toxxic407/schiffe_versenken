@@ -338,6 +338,8 @@ public class PlayerBot {
 
 			ServerSocket ss = new ServerSocket(port);
 			this.s = ss.accept();
+			
+			System.out.println("Connection established.");
 		} else {
 
 			isPlayersTurn = false; // Client does not start playing
@@ -345,8 +347,7 @@ public class PlayerBot {
 			System.out.println();
 			System.out.println();
 		}
-		System.out.println("Connection established.");
-
+		
 		// Ein- und Ausgabestrom des Sockets ermitteln
 		// und als BufferedReader bzw. Writer verpacken.
 		this.in = new BufferedReader(new InputStreamReader(this.s.getInputStream()));
@@ -603,7 +604,6 @@ public class PlayerBot {
 
 		// Send first attack if role is Server and isPlayersTurn
 		if (this.role.equals("Server") && isPlayersTurn) {
-			// TODO send first attack
 			attack();
 
 		}
@@ -801,7 +801,6 @@ public class PlayerBot {
 			new PlayerBot(null, field, s).start();
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
