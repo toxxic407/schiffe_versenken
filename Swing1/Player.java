@@ -81,14 +81,6 @@ public class Player {
 		System.out.println(Arrays.deepToString(friendlyField));
 	}
 
-	public boolean shouldIWaitForSocket() {
-		if (this.role.equals("Server") && this.s == null) {
-			return true;
-		}
-
-		return false;
-	}
-
 	private void spawnEnemyField() {
 		enemyPanel.remove(enemyGridPanel);
 		enemyGridPanel.removeAll();
