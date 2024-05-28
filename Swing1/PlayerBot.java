@@ -38,8 +38,8 @@ public class PlayerBot {
 	private boolean isOpponentReady = false;
 	private Socket s;
 
-	public PlayerBot(int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4,
-			int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
+	public PlayerBot(int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
+			int anzahlSchiffeGroesse2) {
 		/*
 		 * Constructor for Server role
 		 */
@@ -176,7 +176,7 @@ public class PlayerBot {
 		try {
 
 			int[] positionToAttackNow = new int[] { indexToAttackNext[0], indexToAttackNext[1] };
-			lastPositionAttacked = indexToAttackNext; // save last attacked index
+			lastPositionAttacked = indexToAttackNext.clone(); // save last attacked index
 
 			// Strategy attack from right to left
 
@@ -381,7 +381,7 @@ public class PlayerBot {
 				String[] responseList = line.split(" "); // split line based on whitespace
 
 				if (responseList[0].equals("ready")) {
-					//this.isOpponentReady = true;
+					this.isOpponentReady = true;
 
 					// refresh GUI since opponent is ready and Server can send Attack
 					// reload fields
@@ -575,9 +575,16 @@ public class PlayerBot {
 	}
 
 	private void manageBattle() throws IOException {
-		
+
 		System.out.println("is " + role + " turn: " + isPlayersTurn);
-		
+
+		// Send first attack if role is Server and isPlayersTurn
+		if (this.role.equals("Server") && isPlayersTurn) {
+			// TODO send first attack
+			attack();
+
+		}
+
 		// Netzwerknachrichten lesen und verarbeiten.
 		// Da die graphische Oberfläche von einem separaten Thread verwaltet
 		// wird, kann man hier unabhängig davon auf Nachrichten warten.
@@ -597,7 +604,6 @@ public class PlayerBot {
 				int positionAttackedColumn = Integer.parseInt(responseList[2]);
 				int positionAttacked = Integer.parseInt(responseList[1]);
 				int attackResult = -1;
-				// TODO attackResult = 2
 
 				// prepare answer according to the content of the attacked position
 				switch (friendlyField[positionAttackedRow][positionAttackedColumn]) {
