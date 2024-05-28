@@ -77,10 +77,10 @@ public class Player {
 		if (this.role.equals("Server") && this.s == null) {
 			return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	private void spawnEnemyField() {
 		enemyPanel.remove(enemyGridPanel);
 		enemyGridPanel.removeAll();
@@ -576,9 +576,9 @@ public class Player {
 	}
 
 	private void manageBattle() throws IOException {
-		
+
 		System.out.println("is " + role + " turn: " + isPlayersTurn);
-		
+
 		// Netzwerknachrichten lesen und verarbeiten. // Da die graphische Oberfläche
 		// von einem separaten Thread verwaltet // wird, kann man hier unabhängig davon
 		// auf Nachrichten warten. // Manipulationen an der Oberfläche sollten aber
@@ -608,7 +608,7 @@ public class Player {
 					attackResult = 0;
 					friendlyField[positionAttackedRow][positionAttackedColumn] = 2; // change to hit water
 					isPlayersTurn = true; //
-					//System.out.println(role + "'s turn now");
+					// System.out.println(role + "'s turn now");
 					break;
 				}
 				case 1:
@@ -699,7 +699,8 @@ public class Player {
 						"countValueOcurrencesInArray(enemyField, 3) = " + countValueOcurrencesInArray(enemyField, 3));
 				System.out.println("totalShipPartsCount = " + totalShipPartsCount);
 				if (countValueOcurrencesInArray(enemyField, 3) == totalShipPartsCount) {
-					// System.out.println(role + " won."); isPlayersTurn = false;
+					// System.out.println(role + " won.");
+					isPlayersTurn = false;
 					spawnFriendlyField();
 					spawnEnemyField();
 					JOptionPane.showMessageDialog(this.mainFrame, "You won! :)");
@@ -750,11 +751,11 @@ public class Player {
 
 			BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 			Writer out = new OutputStreamWriter(s.getOutputStream());
-			
+
 			// get answer from server
 			String line0 = in.readLine(); // read line from socket
 			System.out.println("received line0: " + line0);
-			
+
 			// send done
 			out.write(String.format("done %n"));
 			out.flush();
@@ -762,13 +763,13 @@ public class Player {
 			// get answer from server
 			String line1 = in.readLine(); // read line from socket
 			System.out.println("received line1: " + line1);
-			
+
 			// send done
 			out.write(String.format("done %n"));
 			out.flush();
-			
+
 			System.out.println("Client side message: game can start");
-			
+
 			int[][] field = new int[][] { { 1, 1, 1, 1, 1 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0 },
 					{ 0, 0, 0, 0, 0 } };
 			new Player(field, s).start();
