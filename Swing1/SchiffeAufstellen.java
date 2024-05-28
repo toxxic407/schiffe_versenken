@@ -321,11 +321,10 @@ public class SchiffeAufstellen {
 						this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
 				player.start();
 
-				/*
 				new Thread(() -> {
 					playerOpponentBot.start();
 				}).start();
-				*/
+
 			}
 
 		} else // When Opponent player is not computer
