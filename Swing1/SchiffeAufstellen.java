@@ -31,7 +31,7 @@ public class SchiffeAufstellen {
 	private JPanel fieldPanel = new JPanel();
 	private JPanel fieldGridPanel = new JPanel();
 	private boolean playAgainstComputer;
-	private boolean botWillPlay;
+	private boolean botWillPlayForMe;
 	private int fieldSize;
 	private int anzahlSchiffeGroesse5;
 	private int anzahlSchiffeGroesse4;
@@ -43,7 +43,7 @@ public class SchiffeAufstellen {
 	private int startYShipToRelocate;
 	private Socket s;
 
-	public SchiffeAufstellen(String role, JFrame menuFrame, boolean playAgainstComputer, boolean botWillPlay,
+	public SchiffeAufstellen(String role, JFrame menuFrame, boolean playAgainstComputer, boolean botWillPlayForMe,
 			int fieldSize, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
 			int anzahlSchiffeGroesse2) {
 		// set instance variables
@@ -52,7 +52,7 @@ public class SchiffeAufstellen {
 		if (role.equals("Server")) {
 			this.menuFrame = menuFrame;
 			this.playAgainstComputer = playAgainstComputer;
-			this.botWillPlay = botWillPlay;
+			this.botWillPlayForMe = botWillPlayForMe;
 			this.fieldSize = fieldSize;
 
 			this.field = new int[fieldSize][fieldSize];
@@ -212,6 +212,8 @@ public class SchiffeAufstellen {
 	}
 
 	private void placeAllShips() {
+		this.field = new int[this.fieldSize][this.fieldSize];
+		
 		placeShips(anzahlSchiffeGroesse5, 5);
 		placeShips(anzahlSchiffeGroesse4, 4);
 		placeShips(anzahlSchiffeGroesse3, 3);
@@ -295,6 +297,59 @@ public class SchiffeAufstellen {
 		return row >= 0 && row < fieldSize && col >= 0 && col < fieldSize;
 	}
 
+	private void manageGameStarter() {
+		// When Opponent player is BOT
+		if (this.playAgainstComputer) {
+			// Create Opponent Bot
+			PlayerBotNoUI playerOpponentBot = new PlayerBotNoUI(this.field.length, anzahlSchiffeGroesse5,
+					anzahlSchiffeGroesse4, anzahlSchiffeGroesse3, anzahlSchiffeGroesse2);
+
+			// If Local player is Bot
+			if (this.botWillPlayForMe) {
+				PlayerBot player = new PlayerBot(this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
+						this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
+				player.start();
+
+				new Thread(() -> {
+					playerOpponentBot.start();
+				}).start();
+
+			} else // If Local player is NOT Bot
+
+			{
+				Player player = new Player(this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
+						this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
+				player.start();
+
+				/*
+				new Thread(() -> {
+					playerOpponentBot.start();
+				}).start();
+				*/
+			}
+
+		} else // When Opponent player is not computer
+		{
+			// If Local player is Bot
+			if (this.botWillPlayForMe) {
+				if (this.role == "Server") {
+					// TODO when player is server and bot
+
+				} else if (this.role == "Client") {
+					// TODO when player is Client and bot
+				}
+			} else // If Local player is NOT Bot
+			{
+				if (this.role == "Server") {
+					// TODO when player is server and bot
+
+				} else if (this.role == "Client") {
+					// TODO when player is Client and bot
+				}
+			}
+		}
+	}
+
 	private void showUI() {
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 		// "Swing1" wird in den Titelbalken geschrieben.
@@ -331,6 +386,25 @@ public class SchiffeAufstellen {
 		mainFrame.add(fieldPanel);
 
 		mainFrame.add(Box.createVerticalStrut(50));
+		
+		JButton buttonSuffleShips = new JButton("Schiffe neu positionieren");
+		buttonSuffleShips.setAlignmentX(Component.CENTER_ALIGNMENT);
+		buttonSuffleShips.addActionListener((e) -> {
+			System.out.println("Knopf gedrückt: Schiffe neu positionieren");
+			
+			
+
+			// place ships in random positions
+			placeAllShips();
+			
+			// respawn field
+			spawnField();
+
+		});
+		mainFrame.add(buttonSuffleShips);
+
+		// Festen Zwischenraum der Größe 50 Pixel hinzufügen.
+		mainFrame.add(Box.createVerticalStrut(50));
 
 		JButton buttonSpielErstellen = new JButton("Spiel starten");
 		buttonSpielErstellen.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -339,39 +413,7 @@ public class SchiffeAufstellen {
 
 			mainFrame.setVisible(false);
 
-			if (this.playAgainstComputer) {
-				if (!this.botWillPlay) {
-					if (this.role == "Server") {
-
-						Player player = new Player(this.field, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
-								this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2);
-						player.start();
-
-						new Thread(() -> {
-							new PlayerBotNoUI(this.field.length, anzahlSchiffeGroesse5, anzahlSchiffeGroesse4,
-									anzahlSchiffeGroesse3, anzahlSchiffeGroesse2).start();
-						}).start();
-
-					} else if (this.role == "Client") {
-						// TODO when player is Client and NOT bot
-
-					}
-
-				} else if (botWillPlay) {
-					if (this.role == "Server") {
-						// TODO when player is server and bot
-
-					} else if (this.role == "Client") {
-						// TODO when player is Client and bot
-					}
-				}
-			}
-
-			/*
-			 * new SchiffeAufstellen( menuFrame, playAgainstComputer, botWillPlay,
-			 * this.fieldSize, this.anzahlSchiffeGroesse5, this.anzahlSchiffeGroesse4,
-			 * this.anzahlSchiffeGroesse3, this.anzahlSchiffeGroesse2 );
-			 */
+			manageGameStarter();
 		});
 		mainFrame.add(buttonSpielErstellen);
 
