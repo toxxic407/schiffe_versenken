@@ -202,8 +202,9 @@ public class SchiffeAufstellen {
 
 				// if button is NOT in valid position to relocate ship, disable it. If it is in
 				// valid position, add method to place the ship there
-				boolean canShipBeRelocatedHere = canPlaceShip(row, column, sizeOfShipToRelocate, !shipToRelocateShouldBeVertical);
-				
+				boolean canShipBeRelocatedHere = canPlaceShip(row, column, sizeOfShipToRelocate,
+						!shipToRelocateShouldBeVertical);
+
 				if (!canShipBeRelocatedHere) {
 					button.setEnabled(false);
 				} else {
@@ -247,6 +248,8 @@ public class SchiffeAufstellen {
 	private void manageRelocateShipManually(int row, int column) {
 
 		this.relocationOfShipMode = true;
+
+		// deactivate start game button
 
 		int[] shipInfo = getShipInfo(row, column);
 		/*
@@ -322,7 +325,6 @@ public class SchiffeAufstellen {
 		fieldPanel.repaint();
 		// fieldPanel.setVisible(true);
 	}
-	
 
 	// Method to check if the new position is valid
 //	private boolean isValidPosition(int row, int column, boolean vertical, int size) {
@@ -343,7 +345,6 @@ public class SchiffeAufstellen {
 //		}
 //		return true;
 //	}
-	
 
 	private int[] getShipInfo(int x, int y) {
 		int size = 0;
@@ -581,8 +582,15 @@ public class SchiffeAufstellen {
 		JButton buttonSpielErstellen = new JButton("Spiel starten");
 		buttonSpielErstellen.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonSpielErstellen.addActionListener((e) -> {
-
 			System.out.println("Knopf gedrückt: Spiel starten");
+
+			// is mode to relocate ship is activated, do not start game
+			if (this.relocationOfShipMode) {
+				JOptionPane.showMessageDialog(mainFrame,
+						"Es ist nicht möglich, das Spiel zu starten, weil nicht alle Schiffe auf dem Spielfeld sind.", "Fehler",
+						JOptionPane.ERROR_MESSAGE);
+				return;
+			}
 
 			// ask who will play: computer of bot
 
