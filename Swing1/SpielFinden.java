@@ -51,6 +51,8 @@ class SpielFinden {
 		if (selectedRow != -1) {
 			String selectedIp = (String) this.tableModel.getValueAt(selectedRow, 1);
 			System.out.println("Joining game at IP: " + selectedIp);
+			
+			frame.setVisible(false);
 
 			// TODO Add logic to join the game using the selected IP address
 			new Thread(() -> {
@@ -306,7 +308,7 @@ class SpielFinden {
 		JButton joinGameButton = new JButton("Spiel beitreten");
 		joinGameButton.addActionListener((e) -> {
 			System.out.println("Knopf gedrückt: Spiel beitreten");
-			frame.setVisible(false);
+			
 			manageJoinGame();
 		});
 
