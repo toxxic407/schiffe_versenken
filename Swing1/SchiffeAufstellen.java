@@ -1,22 +1,33 @@
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.MediaTracker;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Random;
 
 import javax.swing.Box;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -51,6 +62,7 @@ public class SchiffeAufstellen {
 	private Socket s;
 	private boolean isClientFieldSizeDone;
 	private boolean areClientFieldShipsDone;
+	final int shipValueForPreviews = -1;
 
 	public SchiffeAufstellen(JFrame menuFrame, boolean playAgainstComputer, int fieldSize, int anzahlSchiffeGroesse5,
 			int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
@@ -184,9 +196,23 @@ public class SchiffeAufstellen {
 		}
 	}
 
-	private void spawnFieldWhenRelocatingShip(boolean shipToRelocateShouldBeVertical, int sizeOfShipToRelocate) {
+	private void removePreviewShips() {
+		// if value in this position = previewShipValue, make it 0.
+
+		for (int row = 0; row < fieldSize; row++) {
+			for (int column = 0; column < fieldSize; column++) {
+				if (field[row][column] == shipValueForPreviews) {
+					field[row][column] = 0;
+				}
+			}
+		}
+	}
+
+	private void spawnFieldWhenRelocatingShip(boolean shipToRelocateShouldBeVertical, int sizeOfShipToRelocate,
+			boolean showPreview) {
 		fieldPanel.remove(fieldGridPanel);
 		fieldGridPanel.removeAll();
+		// TODO test for new pointer
 		fieldGridPanel = new JPanel();
 
 		fieldGridPanel.setLayout(new GridLayout(fieldSize, fieldSize));
@@ -197,26 +223,64 @@ public class SchiffeAufstellen {
 
 			for (int j = 0; j < fieldSize; j++) {
 				int column = j;
-				JButton button = new JButton(row + "," + column);
+				JButton button = new JButton();
 				button.setPreferredSize(new Dimension(50, 50));
 
 				// if button is NOT in valid position to relocate ship, disable it. If it is in
-				// valid position, add method to place the ship there
+				// valid position, add method to place the ship there and preview ship
 				boolean canShipBeRelocatedHere = canPlaceShip(row, column, sizeOfShipToRelocate,
 						!shipToRelocateShouldBeVertical);
 
 				if (!canShipBeRelocatedHere) {
 					button.setEnabled(false);
+					button.setBackground(Color.pink);
 				} else {
 
-					button.addActionListener(new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							relocationOfShipMode = false; // deactivate relocation mode
-							placeShip(row, column, sizeOfShipToRelocate, !shipToRelocateShouldBeVertical, 1);
-							spawnField(); // spawn field as normal
+					// action to preview ship in field on hover
+					button.addMouseListener(new MouseAdapter() {
+
+						public void mouseEntered(MouseEvent me) {
+							// if preview has be shown here, do not show it in the next mouseEntered to
+							// avoid endless loop of MouseEntered
+							if (showPreview) {
+
+								// remove previous previews of ships
+								removePreviewShips();
+
+								// place ship with a value for preview ships
+								placeShip(row, column, sizeOfShipToRelocate, !shipToRelocateShouldBeVertical,
+										shipValueForPreviews);
+
+								// reload parent method
+								spawnFieldWhenRelocatingShip(shipToRelocateShouldBeVertical, sizeOfShipToRelocate,
+										false);
+							}
 
 						}
+
+						public void mouseExited(MouseEvent me) {
+
+							// remove previous previews of ships
+							removePreviewShips();
+
+							// place ship with a value for preview ships
+							placeShip(row, column, sizeOfShipToRelocate, !shipToRelocateShouldBeVertical,
+									shipValueForPreviews);
+
+							// reload parent method
+							spawnFieldWhenRelocatingShip(shipToRelocateShouldBeVertical, sizeOfShipToRelocate, true);
+						}
+
+						public void mouseClicked(MouseEvent e) {
+
+							relocationOfShipMode = false; // deactivate relocation mode
+							// remove previous previews of ships
+							removePreviewShips();
+							// place ship in new position
+							placeShip(row, column, sizeOfShipToRelocate, !shipToRelocateShouldBeVertical, 1);
+							spawnField(); // spawn field as normal
+						}
+
 					});
 
 				}
@@ -227,6 +291,11 @@ public class SchiffeAufstellen {
 					button.setBackground(Color.blue);
 				} else if (field[row][column] == 0) {
 					button.setBackground(Color.red); // wasser, aber Ship can NOT be located here
+				}
+
+				// if value is shipValueForPreviews, it is a preview of ship
+				if (field[row][column] == shipValueForPreviews) {
+					button.setBackground(Color.gray);
 				}
 
 				if (field[row][column] == 1) {
@@ -243,6 +312,7 @@ public class SchiffeAufstellen {
 		// Revalidate and repaint the mainFrame to reflect changes
 		fieldPanel.revalidate();
 		fieldPanel.repaint();
+
 	}
 
 	private void manageRelocateShipManually(int row, int column) {
@@ -264,7 +334,7 @@ public class SchiffeAufstellen {
 
 		// TODO create method spawn field when relocating. It should enable only the
 		// buttons where it is possible to relocate that ship size in that position
-		spawnFieldWhenRelocatingShip(shipToRelocateShouldBeVertical, sizeOfShipToRelocate);
+		spawnFieldWhenRelocatingShip(shipToRelocateShouldBeVertical, sizeOfShipToRelocate, true);
 
 	}
 
@@ -280,7 +350,7 @@ public class SchiffeAufstellen {
 			for (int j = 0; j < fieldSize; j++) {
 				int row = i;
 				int column = j;
-				JButton button = new JButton(row + "," + column);
+				JButton button = new JButton();
 				button.setPreferredSize(new Dimension(50, 50));
 
 				// change color of button according to value in the field (ship part or water)
@@ -324,6 +394,7 @@ public class SchiffeAufstellen {
 		fieldPanel.revalidate();
 		fieldPanel.repaint();
 		// fieldPanel.setVisible(true);
+
 	}
 
 	// Method to check if the new position is valid
@@ -435,7 +506,8 @@ public class SchiffeAufstellen {
 				for (int j = -1; j <= 1; j++) {
 					int newRow = row + j;
 					int newCol = col + i;
-					if (isInBounds(newRow, newCol) && field[newRow][newCol] != 0) {
+					if (isInBounds(newRow, newCol) && field[newRow][newCol] != 0
+							&& field[newRow][newCol] != shipValueForPreviews) {
 						return false;
 					}
 				}
@@ -449,7 +521,8 @@ public class SchiffeAufstellen {
 				for (int j = -1; j <= 1; j++) {
 					int newRow = row + i;
 					int newCol = col + j;
-					if (isInBounds(newRow, newCol) && field[newRow][newCol] != 0) {
+					if (isInBounds(newRow, newCol) && field[newRow][newCol] != 0
+							&& field[newRow][newCol] != shipValueForPreviews) {
 						return false;
 					}
 				}
@@ -587,8 +660,8 @@ public class SchiffeAufstellen {
 			// is mode to relocate ship is activated, do not start game
 			if (this.relocationOfShipMode) {
 				JOptionPane.showMessageDialog(mainFrame,
-						"Es ist nicht möglich, das Spiel zu starten, weil nicht alle Schiffe auf dem Spielfeld sind.", "Fehler",
-						JOptionPane.ERROR_MESSAGE);
+						"Es ist nicht möglich, das Spiel zu starten, weil nicht alle Schiffe auf dem Spielfeld sind.",
+						"Fehler", JOptionPane.ERROR_MESSAGE);
 				return;
 			}
 
