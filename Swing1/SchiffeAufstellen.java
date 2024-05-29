@@ -55,7 +55,7 @@ public class SchiffeAufstellen {
 	private int anzahlSchiffeGroesse3;
 	private int anzahlSchiffeGroesse2;
 //	private int sizeOfShipToRelocate = -1;
-//	private boolean shipToRelocateShouldBeVertical = false;
+	private boolean shipToRelocateShouldBeVertical = false;
 	private boolean relocationOfShipMode = false;
 //	private int startXShipToRelocate;
 //	private int startYShipToRelocate;
@@ -63,6 +63,8 @@ public class SchiffeAufstellen {
 	private boolean isClientFieldSizeDone;
 	private boolean areClientFieldShipsDone;
 	final int shipValueForPreviews = -1;
+	private JPanel rotateButtonPanel = new JPanel();
+	private JButton rotateButton = new JButton();
 
 	public SchiffeAufstellen(JFrame menuFrame, boolean playAgainstComputer, int fieldSize, int anzahlSchiffeGroesse5,
 			int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
@@ -208,8 +210,8 @@ public class SchiffeAufstellen {
 		}
 	}
 
-	private void spawnFieldWhenRelocatingShip(boolean shipToRelocateShouldBeVertical, int sizeOfShipToRelocate,
-			boolean showPreview) {
+	private void spawnFieldWhenRelocatingShip(int sizeOfShipToRelocate, boolean showPreview) {
+		displayRotateButton(sizeOfShipToRelocate);
 		fieldPanel.remove(fieldGridPanel);
 		fieldGridPanel.removeAll();
 		// TODO test for new pointer
@@ -252,8 +254,7 @@ public class SchiffeAufstellen {
 										shipValueForPreviews);
 
 								// reload parent method
-								spawnFieldWhenRelocatingShip(shipToRelocateShouldBeVertical, sizeOfShipToRelocate,
-										false);
+								spawnFieldWhenRelocatingShip(sizeOfShipToRelocate, false);
 							}
 
 						}
@@ -268,7 +269,7 @@ public class SchiffeAufstellen {
 									shipValueForPreviews);
 
 							// reload parent method
-							spawnFieldWhenRelocatingShip(shipToRelocateShouldBeVertical, sizeOfShipToRelocate, true);
+							spawnFieldWhenRelocatingShip(sizeOfShipToRelocate, true);
 						}
 
 						public void mouseClicked(MouseEvent e) {
@@ -327,18 +328,19 @@ public class SchiffeAufstellen {
 		 * }
 		 */
 		int sizeOfShipToRelocate = shipInfo[0];
-		boolean shipToRelocateShouldBeVertical = shipInfo[1] == 1;
+		shipToRelocateShouldBeVertical = shipInfo[1] == 1;
 		int startXShipToRelocate = shipInfo[2];
 		int startYShipToRelocate = shipInfo[3];
 		removeShip(shipInfo[2], shipInfo[3], shipToRelocateShouldBeVertical, sizeOfShipToRelocate);
 
 		// TODO create method spawn field when relocating. It should enable only the
 		// buttons where it is possible to relocate that ship size in that position
-		spawnFieldWhenRelocatingShip(shipToRelocateShouldBeVertical, sizeOfShipToRelocate, true);
+		spawnFieldWhenRelocatingShip(sizeOfShipToRelocate, true);
 
 	}
 
 	private void spawnField() {
+		displayRotateButton(0);
 		fieldPanel.remove(fieldGridPanel);
 		fieldGridPanel.removeAll();
 		fieldGridPanel = new JPanel();
@@ -396,26 +398,6 @@ public class SchiffeAufstellen {
 		// fieldPanel.setVisible(true);
 
 	}
-
-	// Method to check if the new position is valid
-//	private boolean isValidPosition(int row, int column, boolean vertical, int size) {
-//		if (vertical) {
-//			if (row + size > fieldSize)
-//				return false; // Check boundaries
-//			for (int i = 0; i < size; i++) {
-//				if (field[row + i][column] != 0)
-//					return false; // Check for collisions
-//			}
-//		} else {
-//			if (column + size > fieldSize)
-//				return false; // Check boundaries
-//			for (int i = 0; i < size; i++) {
-//				if (field[row][column + i] != 0)
-//					return false; // Check for collisions
-//			}
-//		}
-//		return true;
-//	}
 
 	private int[] getShipInfo(int x, int y) {
 		int size = 0;
@@ -593,6 +575,33 @@ public class SchiffeAufstellen {
 		}
 	}
 
+	private void displayRotateButton(int sizeOfShipToRelocate) {
+		System.out.println("Repainting rotate button");
+		if(rotateButtonPanel != null) {
+			rotateButtonPanel.remove(rotateButton);
+		}
+		
+
+		rotateButton = new JButton("Schiff rotieren");
+		rotateButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				shipToRelocateShouldBeVertical = !shipToRelocateShouldBeVertical;
+				spawnFieldWhenRelocatingShip(sizeOfShipToRelocate, false);
+			}
+		});
+
+		// enable or disable according to mode of ships relocation
+		rotateButton.setEnabled(relocationOfShipMode);
+
+		rotateButtonPanel.add(rotateButton);
+
+		// Revalidate and repaint to reflect changes
+		rotateButtonPanel.revalidate();
+		rotateButtonPanel.repaint();
+
+	}
+
 	private void showUI() {
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
 		// "Swing1" wird in den Titelbalken geschrieben.
@@ -622,7 +631,7 @@ public class SchiffeAufstellen {
 		label.setAlignmentX(Component.CENTER_ALIGNMENT);
 		mainFrame.add(label);
 
-		mainFrame.add(Box.createVerticalStrut(50));
+		mainFrame.add(Box.createVerticalStrut(25));
 
 		// place ships in random positions
 		placeAllShips();
@@ -632,6 +641,11 @@ public class SchiffeAufstellen {
 		mainFrame.add(fieldPanel);
 
 		mainFrame.add(Box.createVerticalStrut(50));
+		
+		// Create a panel to hold the rotate button
+		displayRotateButton(0);
+		
+		mainFrame.add(rotateButtonPanel);
 
 		JButton buttonSuffleShips = new JButton("Schiffe neu positionieren");
 		buttonSuffleShips.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -650,7 +664,7 @@ public class SchiffeAufstellen {
 		mainFrame.add(buttonSuffleShips);
 
 		// Festen Zwischenraum der Größe 50 Pixel hinzufügen.
-		mainFrame.add(Box.createVerticalStrut(50));
+		mainFrame.add(Box.createVerticalStrut(25));
 
 		JButton buttonSpielErstellen = new JButton("Spiel starten");
 		buttonSpielErstellen.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -693,7 +707,7 @@ public class SchiffeAufstellen {
 		mainFrame.add(buttonSpielErstellen);
 
 		// Festen Zwischenraum der Größe 50 Pixel hinzufügen.
-		mainFrame.add(Box.createVerticalStrut(50));
+		mainFrame.add(Box.createVerticalStrut(25));
 
 		// Menüzeile (JMenuBar) erzeugen und einzelne Menüs (JMenu)
 		// mit Menüpunkten (JMenuItem) hinzufügen.
