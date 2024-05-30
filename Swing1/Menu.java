@@ -8,11 +8,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 // Erstes Beispiel zur Verwendung von (AWT und) Swing.
 class Menu {
-	
-	// TODO close sockets when game ends for all 3 player types. So that other games can be created
-	// TODO close socket when one of the users disconnects 
 	// TODO save and load game
-	// TODO relocate ships manually
+	// TODO close sockets when game ends for all 3 player types. So that other games can be created
 	// TODO look for bugs
 	
 	// Graphische Oberfläche aufbauen und anzeigen.
@@ -145,7 +142,7 @@ class Menu {
 	private static File getGameFilePath() {
 		try {
 			JFileChooser fileChooser = new JFileChooser();
-			FileNameExtensionFilter filter = new FileNameExtensionFilter("Game files (.json)", "json");
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("JSON file(.json)", "json");
 
 			fileChooser.setFileFilter(filter);
 

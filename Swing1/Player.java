@@ -1,10 +1,14 @@
 import java.awt.*;
 import java.awt.event.*;
+
+import javax.annotation.processing.SupportedSourceVersion;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import Components.MenuBar;
 
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.io.*;
 import java.util.*;
 
@@ -29,8 +33,8 @@ public class Player {
 	private int anzahlSchiffeGroesse4 = 0;
 	private int anzahlSchiffeGroesse3 = 0;
 	private int anzahlSchiffeGroesse2 = 0;
-	private JPanel enemyGridPanel = new JPanel();;
-	private JPanel friendlyGridPanel = new JPanel();;
+	private JPanel enemyGridPanel = new JPanel();
+	private JPanel friendlyGridPanel = new JPanel();
 	private JFrame mainFrame;
 	private JFrame menuFrame;
 	private JPanel enemyPanel;
@@ -40,10 +44,9 @@ public class Player {
 	private boolean areClientFieldShipsDone = false;
 	private boolean isOpponentReady = false;
 	public Socket s;
-	private int attacksSent = 0;
 
-	public Player(JFrame menuFrame, int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3,
-			int anzahlSchiffeGroesse2) {
+	public Player(JFrame menuFrame, int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4,
+			int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
 		/*
 		 * Constructor for Server role
 		 */
@@ -56,7 +59,7 @@ public class Player {
 		this.anzahlSchiffeGroesse2 = anzahlSchiffeGroesse2;
 
 		this.enemyField = new int[field.length][field.length];
-		
+
 		this.menuFrame = menuFrame;
 
 		System.out.println(Arrays.deepToString(enemyField));
@@ -74,7 +77,7 @@ public class Player {
 		this.s = s;
 
 		this.enemyField = new int[field.length][field.length];
-		
+
 		this.menuFrame = menuFrame;
 
 		System.out.println(Arrays.deepToString(enemyField));
@@ -128,8 +131,6 @@ public class Player {
 						lastPositionAttacked = new int[] { row, column }; // save last attacked index
 
 						// System.out.println(String.format("sent: shot %d%n", index + 1));
-
-						this.attacksSent = this.attacksSent + 1;
 
 						// send attack
 						out.write(String.format("shot %d %d%n", row, column));
@@ -205,6 +206,269 @@ public class Player {
 		return output;
 	}
 
+	private static File getGameFilePath() {
+		try {
+			JFileChooser fileChooser = new JFileChooser();
+			FileNameExtensionFilter filter = new FileNameExtensionFilter("SER file(.ser)", "ser");
+
+			fileChooser.setFileFilter(filter);
+
+			fileChooser.setCurrentDirectory(new File("."));
+
+			int result = fileChooser.showOpenDialog(null);
+
+			if (result == JFileChooser.APPROVE_OPTION) {
+				File selectedFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
+				System.out.println("Filepath: " + selectedFile);
+				return selectedFile;
+			}
+
+			return null;
+		} catch (Exception e) {
+			System.out.println(e);
+			return null;
+		}
+
+	}
+
+	private Map<String, String> deSerializeHashMap(String filePath) throws ClassNotFoundException, IOException {
+		FileInputStream fis = new FileInputStream(filePath);
+		ObjectInputStream ois = new ObjectInputStream(fis);
+		@SuppressWarnings("unchecked")
+		Map<String, String> map = (Map<String, String>) ois.readObject();
+		ois.close();
+		System.out.println("De Serialized HashMap data  saved in hashmap.ser");
+		return map;
+	}
+
+	private void serializeHashMap(Map<String, String> hmap, String filePath) throws IOException {
+		filePath = filePath.replace(".ser", ""); // if extension is included in filepath, remove it
+		System.out.println("serializeHashMap(): save in " + filePath + ".ser");
+		FileOutputStream fos = new FileOutputStream(filePath + ".ser");
+		ObjectOutputStream oos = new ObjectOutputStream(fos);
+		oos.writeObject(hmap);
+		oos.close();
+		fos.close();
+		System.out.println("Serialized HashMap data is saved in " + filePath);
+	}
+
+	public static String twoDimArrayToString(int[][] array) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		for (int i = 0; i < array.length; i++) {
+			sb.append(Arrays.toString(array[i]));
+			if (i < array.length - 1) {
+				sb.append(", ");
+			}
+		}
+		sb.append("]");
+		return sb.toString();
+	}
+
+	public static int[] parseStringToIntArray(String str) {
+		// Remove brackets and split by commas
+		String[] stringArray = str.replaceAll("\\[|\\]|\\s", "").split(",");
+		int[] intArray = new int[stringArray.length];
+		for (int i = 0; i < stringArray.length; i++) {
+			intArray[i] = Integer.parseInt(stringArray[i]);
+		}
+		return intArray;
+	}
+
+	public static int[][] parseStringToInt2DArray(String str) {
+		// Remove the outer brackets and split into rows
+		String[] rows = str.substring(1, str.length() - 1).split("], \\[");
+
+		// Adjust the first and last rows to remove extra brackets
+		rows[0] = rows[0].substring(1);
+		rows[rows.length - 1] = rows[rows.length - 1].substring(0, rows[rows.length - 1].length() - 1);
+
+		int[][] array = new int[rows.length][];
+		for (int i = 0; i < rows.length; i++) {
+			array[i] = parseStringToIntArray("[" + rows[i] + "]");
+		}
+		return array;
+	}
+
+	private void saveGame() {
+
+		// choose file to save game
+		File gameFile = getGameFilePath();
+		String filePath = gameFile.getAbsolutePath();
+		// Decode URL encoding
+		filePath = URLDecoder.decode(filePath, StandardCharsets.UTF_8);
+
+		// create id based on current time
+		long gameId = System.currentTimeMillis();
+		System.out.println(gameId);
+
+		// save data in json file
+		Map<String, String> data = new HashMap<>();
+		data.put("gameId", "" + gameId);
+		data.put("isPlayersTurn", "" + isPlayersTurn);
+		data.put("lastPositionAttacked", Arrays.toString(lastPositionAttacked));
+		data.put("enemyField", twoDimArrayToString(enemyField));
+		data.put("friendlyField", twoDimArrayToString(friendlyField));
+		data.put("fieldSize", "" + fieldSize);
+		data.put("anzahlSchiffeGroesse5", "" + anzahlSchiffeGroesse5);
+		data.put("anzahlSchiffeGroesse4", "" + anzahlSchiffeGroesse4);
+		data.put("anzahlSchiffeGroesse3", "" + anzahlSchiffeGroesse3);
+		data.put("anzahlSchiffeGroesse2", "" + anzahlSchiffeGroesse2);
+		data.put("totalShipPartsCount", "" + totalShipPartsCount);
+		data.put("isClientFieldSizeDone", "" + isClientFieldSizeDone);
+		data.put("areClientFieldShipsDone", "" + areClientFieldShipsDone);
+		data.put("isOpponentReady", "" + isOpponentReady);
+
+		try {
+			serializeHashMap(data, filePath);
+
+			// inform via socket to the other player to save the game
+			out.write(String.format("save %d%n", gameId));
+			out.flush();
+
+			// show success message
+			JOptionPane.showMessageDialog(mainFrame, "Spielstand gespeichert");
+
+		} catch (IOException e) {
+			e.printStackTrace();
+
+			String message = "Fehler beim Speichern des Spielstands";
+			JOptionPane.showMessageDialog(new JFrame(), message, "Fehler", JOptionPane.ERROR_MESSAGE);
+		}
+
+	}
+
+	private void loadGameServer() {
+		// choose file to load game
+		File gameFile = getGameFilePath();
+		String filePath = gameFile.getAbsolutePath();
+		// Decode URL encoding
+		filePath = URLDecoder.decode(filePath, StandardCharsets.UTF_8);
+
+		// get data from file
+		try {
+			Map<String, String> gameData = deSerializeHashMap(filePath);
+
+			// extract game data
+			String gameId = gameData.get("gameId");
+			this.isPlayersTurn = Boolean.parseBoolean(gameData.get("isPlayersTurn"));
+			this.lastPositionAttacked = parseStringToIntArray(gameData.get("lastPositionAttacked"));
+			this.enemyField = parseStringToInt2DArray(gameData.get("enemyField"));
+			this.friendlyField = parseStringToInt2DArray(gameData.get("friendlyField"));
+			this.fieldSize = Integer.parseInt(gameData.get("fieldSize"));
+			this.anzahlSchiffeGroesse5 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse5"));
+			this.anzahlSchiffeGroesse4 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse4"));
+			this.anzahlSchiffeGroesse3 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse3"));
+			this.anzahlSchiffeGroesse2 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse2"));
+			this.totalShipPartsCount = Integer.parseInt(gameData.get("totalShipPartsCount"));
+			this.isClientFieldSizeDone = Boolean.parseBoolean(gameData.get("isClientFieldSizeDone"));
+			this.areClientFieldShipsDone = Boolean.parseBoolean(gameData.get("areClientFieldShipsDone"));
+			this.isOpponentReady = Boolean.parseBoolean(gameData.get("isOpponentReady"));
+
+			// reload fields
+			spawnEnemyField();
+			spawnFriendlyField();
+
+			// inform via socket to the other player to save the game
+			out.write(String.format("load %s%n", gameId));
+			out.flush();
+
+			JOptionPane.showMessageDialog(mainFrame, "Spielstand erfolgreich geladen");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			String message = "Fehler beim Laden des Spielstands";
+			JOptionPane.showMessageDialog(new JFrame(), message, "Fehler", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
+	private boolean saveGameClient(String gameId) {
+		String currentDirectory = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+		// Decode URL encoding
+		currentDirectory = URLDecoder.decode(currentDirectory, StandardCharsets.UTF_8);
+		// get file where games are saved as client
+		String filePath = currentDirectory + "/savedGamesAsClient/" + gameId;
+
+		// save data in json file
+		Map<String, String> data = new HashMap<>();
+		data.put("isPlayersTurn", "" + isPlayersTurn);
+		data.put("lastPositionAttacked", Arrays.toString(lastPositionAttacked));
+		data.put("enemyField", twoDimArrayToString(enemyField));
+		data.put("friendlyField", twoDimArrayToString(friendlyField));
+		data.put("fieldSize", "" + fieldSize);
+		data.put("anzahlSchiffeGroesse5", "" + anzahlSchiffeGroesse5);
+		data.put("anzahlSchiffeGroesse4", "" + anzahlSchiffeGroesse4);
+		data.put("anzahlSchiffeGroesse3", "" + anzahlSchiffeGroesse3);
+		data.put("anzahlSchiffeGroesse2", "" + anzahlSchiffeGroesse2);
+		data.put("totalShipPartsCount", "" + totalShipPartsCount);
+		data.put("isClientFieldSizeDone", "" + isClientFieldSizeDone);
+		data.put("areClientFieldShipsDone", "" + areClientFieldShipsDone);
+		data.put("isOpponentReady", "" + isOpponentReady);
+
+		try {
+
+			serializeHashMap(data, filePath);
+
+			// inform via socket to the other player that game has been loaded successfully
+			out.write(String.format("ok%n"));
+			out.flush();
+
+			return true;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+
+			return false;
+		}
+
+	}
+
+	private boolean loadGameClient(String gameId) {
+		// TODO
+		String currentDirectory = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+		// Decode URL encoding
+		currentDirectory = URLDecoder.decode(currentDirectory, StandardCharsets.UTF_8);
+
+		// get file where games are saved as client
+		String filePath = currentDirectory + "/savedGamesAsClient/" + gameId + ".ser";
+
+		// get data from file
+		try {
+			Map<String, String> gameData = deSerializeHashMap(filePath);
+
+			// extract game data
+			this.isPlayersTurn = Boolean.parseBoolean(gameData.get("isPlayersTurn"));
+			this.lastPositionAttacked = parseStringToIntArray(gameData.get("lastPositionAttacked"));
+			this.enemyField = parseStringToInt2DArray(gameData.get("enemyField"));
+			this.friendlyField = parseStringToInt2DArray(gameData.get("friendlyField"));
+			this.fieldSize = Integer.parseInt(gameData.get("fieldSize"));
+			this.anzahlSchiffeGroesse5 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse5"));
+			this.anzahlSchiffeGroesse4 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse4"));
+			this.anzahlSchiffeGroesse3 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse3"));
+			this.anzahlSchiffeGroesse2 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse2"));
+			this.totalShipPartsCount = Integer.parseInt(gameData.get("totalShipPartsCount"));
+			this.isClientFieldSizeDone = Boolean.parseBoolean(gameData.get("isClientFieldSizeDone"));
+			this.areClientFieldShipsDone = Boolean.parseBoolean(gameData.get("areClientFieldShipsDone"));
+			this.isOpponentReady = Boolean.parseBoolean(gameData.get("isOpponentReady"));
+
+			// reload fields
+			spawnEnemyField();
+			spawnFriendlyField();
+
+			// inform via socket to the other player to save the game
+			out.write(String.format("ok%n"));
+			out.flush();
+
+			return true;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return false;
+		}
+	}
+
 	// Graphische Oberfläche aufbauen und anzeigen.
 	private void startGui() {
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
@@ -213,7 +477,7 @@ public class Player {
 		// Beim Schließen des Fensters (z. B. durch Drücken des
 		// X-Knopfs in Windows) soll das Programm beendet werden.
 		this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		// Center the window on the screen
 		this.mainFrame.setLocationRelativeTo(null);
 
@@ -251,7 +515,40 @@ public class Player {
 
 		// Add the fieldsPanel to the main frame
 		this.mainFrame.add(fieldsPanel);
-		
+
+		// Add save button
+		JButton buttonSave = new JButton("Spielstand speichern");
+		buttonSave.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Knopf gedrückt: Spielstand speichern");
+				saveGame();
+			}
+		});
+
+		mainFrame.add(buttonSave);
+		buttonSave.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+		mainFrame.add(Box.createVerticalStrut(10));
+
+		// Add save button
+		JButton buttonLoad = new JButton("Spielstand laden");
+		buttonLoad.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Knopf gedrückt: Spielstand laden");
+				loadGameServer();
+			}
+		});
+
+		mainFrame.add(buttonLoad);
+		buttonLoad.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+		// Festen Zwischenraum der Größe 50 Pixel hinzufügen.
+		mainFrame.add(Box.createVerticalStrut(25));
+
 		if (menuFrame != null) {
 			// Menüzeile (JMenuBar) erzeugen und einzelne Menüs (JMenu)
 			// mit Menüpunkten (JMenuItem) hinzufügen.
@@ -605,10 +902,32 @@ public class Player {
 			System.out.println("received: " + line);
 			String[] responseList = line.split(" "); // split line based on whitespace
 
-			// get attack and answer it
+			// if save game message is received
+			if (responseList[0].equals("save")) {
+				boolean savingSuccesfull = saveGameClient(responseList[1]);
 
+				if (savingSuccesfull) {
+					// show success message
+					JOptionPane.showMessageDialog(mainFrame,
+							"Der Status wird automatisch gespeichert, weil ein anderer Spieler ihn gespeichert hat.");
+				} else {
+					String message = "Fehler beim Speichern des Spielstands";
+					JOptionPane.showMessageDialog(new JFrame(), message, "Fehler", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+			// if load game message is received
+			else if (responseList[0].equals("load")) {
+				boolean loadingSuccessfull = loadGameClient(responseList[1]);
+
+				if (loadingSuccessfull) {
+					JOptionPane.showMessageDialog(mainFrame, "Spielstand erfolgreich geladen");
+				} else {
+					String message = "Fehler beim Laden des Spielstands";
+					JOptionPane.showMessageDialog(new JFrame(), message, "Fehler", JOptionPane.ERROR_MESSAGE);
+				}
+			}
 			// player is receiving an attack
-			if (responseList[0].equals("shot")) {
+			else if (responseList[0].equals("shot")) {
 				System.out.println("attacked received");
 				// process attack
 				int positionAttackedRow = Integer.parseInt(responseList[1]);

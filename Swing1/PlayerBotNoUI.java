@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.io.*;
 import java.util.*;
 
@@ -258,9 +259,9 @@ public class PlayerBotNoUI {
 	private void manageSocketConnection() throws IOException {
 		// Verwendete Portnummer (vgl. Server.java).
 		final int port = 50000;
-		
+
 		boolean isConnectionSuccesfull = false;
-		
+
 		while (!isConnectionSuccesfull) {
 			try {
 				Socket s = new Socket("localhost", port);
@@ -269,7 +270,7 @@ public class PlayerBotNoUI {
 			} catch (Exception e) {
 				continue;
 			}
-			
+
 		}
 
 		System.out.println("Connection established.");
@@ -435,6 +436,147 @@ public class PlayerBotNoUI {
 		}
 	}
 
+	private boolean saveGameClient(String gameId) {
+		String currentDirectory = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+		// Decode URL encoding
+		currentDirectory = URLDecoder.decode(currentDirectory, StandardCharsets.UTF_8);
+		// get file where games are saved as client
+		String filePath = currentDirectory + "/savedGamesAsClient/" + gameId;
+
+		// save data in json file
+		Map<String, String> data = new HashMap<>();
+		data.put("isPlayersTurn", "" + isPlayersTurn);
+		data.put("lastPositionAttacked", Arrays.toString(lastPositionAttacked));
+		data.put("enemyField", twoDimArrayToString(enemyField));
+		data.put("friendlyField", twoDimArrayToString(friendlyField));
+		data.put("fieldSize", "" + fieldSize);
+		data.put("anzahlSchiffeGroesse5", "" + anzahlSchiffeGroesse5);
+		data.put("anzahlSchiffeGroesse4", "" + anzahlSchiffeGroesse4);
+		data.put("anzahlSchiffeGroesse3", "" + anzahlSchiffeGroesse3);
+		data.put("anzahlSchiffeGroesse2", "" + anzahlSchiffeGroesse2);
+		data.put("totalShipPartsCount", "" + totalShipPartsCount);
+		data.put("isClientFieldSizeDone", "" + isClientFieldSizeDone);
+		data.put("areClientFieldShipsDone", "" + areClientFieldShipsDone);
+		data.put("isOpponentReady", "" + isOpponentReady);
+
+		try {
+
+			serializeHashMap(data, filePath);
+
+			// inform via socket to the other player that game has been loaded successfully
+			out.write(String.format("ok%n"));
+			out.flush();
+
+			return true;
+
+		} catch (IOException e) {
+			e.printStackTrace();
+
+			return false;
+		}
+
+	}
+
+	private Map<String, String> deSerializeHashMap(String filePath) throws ClassNotFoundException, IOException {
+		FileInputStream fis = new FileInputStream(filePath);
+		ObjectInputStream ois = new ObjectInputStream(fis);
+		@SuppressWarnings("unchecked")
+		Map<String, String> map = (Map<String, String>) ois.readObject();
+		ois.close();
+		System.out.println("De Serialized HashMap data  saved in hashmap.ser");
+		return map;
+	}
+
+	private void serializeHashMap(Map<String, String> hmap, String filePath) throws IOException {
+		filePath = filePath.replace(".ser", ""); // if extension is included in filepath, remove it
+		System.out.println("serializeHashMap(): save in " + filePath + ".ser");
+		FileOutputStream fos = new FileOutputStream(filePath + ".ser");
+		ObjectOutputStream oos = new ObjectOutputStream(fos);
+		oos.writeObject(hmap);
+		oos.close();
+		fos.close();
+		System.out.println("Serialized HashMap data is saved in " + filePath);
+	}
+
+	public static String twoDimArrayToString(int[][] array) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		for (int i = 0; i < array.length; i++) {
+			sb.append(Arrays.toString(array[i]));
+			if (i < array.length - 1) {
+				sb.append(", ");
+			}
+		}
+		sb.append("]");
+		return sb.toString();
+	}
+
+	public static int[] parseStringToIntArray(String str) {
+		// Remove brackets and split by commas
+		String[] stringArray = str.replaceAll("\\[|\\]|\\s", "").split(",");
+		int[] intArray = new int[stringArray.length];
+		for (int i = 0; i < stringArray.length; i++) {
+			intArray[i] = Integer.parseInt(stringArray[i]);
+		}
+		return intArray;
+	}
+
+	public static int[][] parseStringToInt2DArray(String str) {
+		// Remove the outer brackets and split into rows
+		String[] rows = str.substring(1, str.length() - 1).split("], \\[");
+
+		// Adjust the first and last rows to remove extra brackets
+		rows[0] = rows[0].substring(1);
+		rows[rows.length - 1] = rows[rows.length - 1].substring(0, rows[rows.length - 1].length() - 1);
+
+		int[][] array = new int[rows.length][];
+		for (int i = 0; i < rows.length; i++) {
+			array[i] = parseStringToIntArray("[" + rows[i] + "]");
+		}
+		return array;
+	}
+
+	private boolean loadGameClient(String gameId) {
+		// TODO
+		String currentDirectory = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+		// Decode URL encoding
+		currentDirectory = URLDecoder.decode(currentDirectory, StandardCharsets.UTF_8);
+
+		// get file where games are saved as client
+		String filePath = currentDirectory + "/savedGamesAsClient/" + gameId + ".ser";
+
+		// get data from file
+		try {
+			Map<String, String> gameData = deSerializeHashMap(filePath);
+
+			// extract game data
+			this.isPlayersTurn = Boolean.parseBoolean(gameData.get("isPlayersTurn"));
+			this.lastPositionAttacked = parseStringToIntArray(gameData.get("lastPositionAttacked"));
+			this.enemyField = parseStringToInt2DArray(gameData.get("enemyField"));
+			this.friendlyField = parseStringToInt2DArray(gameData.get("friendlyField"));
+			this.fieldSize = Integer.parseInt(gameData.get("fieldSize"));
+			this.anzahlSchiffeGroesse5 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse5"));
+			this.anzahlSchiffeGroesse4 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse4"));
+			this.anzahlSchiffeGroesse3 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse3"));
+			this.anzahlSchiffeGroesse2 = Integer.parseInt(gameData.get("anzahlSchiffeGroesse2"));
+			this.totalShipPartsCount = Integer.parseInt(gameData.get("totalShipPartsCount"));
+			this.isClientFieldSizeDone = Boolean.parseBoolean(gameData.get("isClientFieldSizeDone"));
+			this.areClientFieldShipsDone = Boolean.parseBoolean(gameData.get("areClientFieldShipsDone"));
+			this.isOpponentReady = Boolean.parseBoolean(gameData.get("isOpponentReady"));
+
+			// inform via socket to the other player to save the game
+			out.write(String.format("ok%n"));
+			out.flush();
+
+			return true;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return false;
+		}
+	}
+
 	private void manageBattle() throws IOException {
 		// Netzwerknachrichten lesen und verarbeiten.
 		// Da die graphische Oberfläche von einem separaten Thread verwaltet
@@ -446,10 +588,18 @@ public class PlayerBotNoUI {
 			System.out.println("received: " + line);
 			String[] responseList = line.split(" "); // split line based on whitespace
 
-			// get attack and answer it
+			// if save game message is received
+			if (responseList[0].equals("save")) {
+				boolean savingSuccesfull = saveGameClient(responseList[1]);
 
+			}
+			// if load game message is received
+			else if (responseList[0].equals("load")) {
+				boolean loadingSuccessfull = loadGameClient(responseList[1]);
+
+			}
 			// player is receiving an attack
-			if (responseList[0].equals("shot")) {
+			else if (responseList[0].equals("shot")) {
 				// process attack
 				int positionAttackedRow = Integer.parseInt(responseList[1]);
 				int positionAttackedColumn = Integer.parseInt(responseList[2]);
@@ -506,7 +656,7 @@ public class PlayerBotNoUI {
 			{
 
 				int attackAnswerNumber = Integer.parseInt(responseList[1]);
-				
+
 				System.out.println("Last possition attacked: " + Arrays.toString(lastPositionAttacked));
 
 				switch (attackAnswerNumber) {
