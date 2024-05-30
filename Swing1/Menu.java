@@ -8,43 +8,36 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 // Erstes Beispiel zur Verwendung von (AWT und) Swing.
 class Menu {
-	// TODO save and load game
-	// TODO close sockets when game ends for all 3 player types. So that other games can be created
+	// TODO close sockets when game ends for all 3 player types. So that other games
+	// can be created
+	// TODO replace Thread()s with Swing Workers
 	// TODO look for bugs
-	
+	// TODO make the size of the buttons on the field scale according to the number
+	// of rows and columns (smaller rows and columns -> bigger buttons, the opposite
+	// when bigger rows and columns
+	// TODO At the end, when the program is finished, remove prints in console that
+	// were used for debugging. And remove code and libraries that are not being
+	// used
+
 	// Graphische Oberfläche aufbauen und anzeigen.
 
 	/*
-	public static void startGameFrame(SpielTestNew spielTestFrame) {
-		(new Thread() {
-			@Override
-			public void run() {
-				try {
-					spielTestFrame.start();
-
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		}).start();
-	}
-
-	public static void startGameFrameNoUI(SpielComputerNoUI spielNoUI) {
-		(new Thread() {
-			@Override
-			public void run() {
-				try {
-					spielNoUI.start();
-
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		}).start();
-	}
-	*/
+	 * public static void startGameFrame(SpielTestNew spielTestFrame) { (new
+	 * Thread() {
+	 * 
+	 * @Override public void run() { try { spielTestFrame.start();
+	 * 
+	 * } catch (IOException e1) { // TODO Auto-generated catch block
+	 * e1.printStackTrace(); } } }).start(); }
+	 * 
+	 * public static void startGameFrameNoUI(SpielComputerNoUI spielNoUI) { (new
+	 * Thread() {
+	 * 
+	 * @Override public void run() { try { spielNoUI.start();
+	 * 
+	 * } catch (IOException e1) { // TODO Auto-generated catch block
+	 * e1.printStackTrace(); } } }).start(); }
+	 */
 
 	public static void start() {
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
@@ -57,9 +50,9 @@ class Menu {
 
 		// set Minimum size
 		frame.setMinimumSize(new Dimension(1200, 500));
-		
+
 		// Center the window on the screen
-    	frame.setLocationRelativeTo(null);
+		frame.setLocationRelativeTo(null);
 
 		// Der Inhalt des Fensters soll von einem BoxLayout-Manager
 		// verwaltet werden, der seine Bestandteile vertikal (von
@@ -76,10 +69,9 @@ class Menu {
 			System.out.println("Knopf gedrückt: Gegen anderen Speieler spielen");
 
 			frame.setVisible(false); // this will close current login box window
-			
+
 			// TODO redirect to Server finder / SpielFinden
 			new SpielFinden(frame);
-			
 
 		});
 		frame.add(buttonGegenSpieler);
@@ -95,31 +87,17 @@ class Menu {
 
 			frame.setVisible(false); // this will close current login box window
 
-			//SpielTestNew spielTestNew = new SpielTestNew("");
-			//SpielComputerNoUI spielComputerNoUI = new SpielComputerNoUI("localhost");
+			// SpielTestNew spielTestNew = new SpielTestNew("");
+			// SpielComputerNoUI spielComputerNoUI = new SpielComputerNoUI("localhost");
 
-			//startGameFrame(spielTestNew);
+			// startGameFrame(spielTestNew);
 
-			//startGameFrameNoUI(spielComputerNoUI);
-			
+			// startGameFrameNoUI(spielComputerNoUI);
+
 			new SpielErstellen("Server", frame, true);
 
 		});
 		frame.add(buttonGegenComputer);
-
-		// Festen Zwischenraum der Größe 50 Pixel hinzufügen.
-		frame.add(Box.createVerticalStrut(50));
-
-		// Button: Speil laden
-		JButton buttonSpielLaden = new JButton("Spiel laden");
-		buttonSpielLaden.setAlignmentX(Component.CENTER_ALIGNMENT);
-		buttonSpielLaden.addActionListener((e) -> {
-			System.out.println("Knopf gedrückt: Spiel laden");
-
-			// choose file to load game
-			File gameFilePath = getGameFilePath();
-		});
-		frame.add(buttonSpielLaden);
 
 		// Festen Zwischenraum der Größe 50 Pixel hinzufügen.
 		frame.add(Box.createVerticalStrut(50));
