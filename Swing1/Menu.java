@@ -6,38 +6,23 @@ import java.io.IOException;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-// Erstes Beispiel zur Verwendung von (AWT und) Swing.
 class Menu {
-	// TODO close sockets when game ends for all 3 player types. So that other games
-	// can be created
-	// TODO replace Thread()s with Swing Workers
-	// TODO look for bugs
+	// TODO close sockets when game ends for all 3 player types (also when any
+	// player gets disconnected). So that other games can be created
+	// TODO use Swing Workers instead of Thread()
 	// TODO make the size of the buttons on the field scale according to the number
 	// of rows and columns (smaller rows and columns -> bigger buttons, the opposite
-	// when bigger rows and columns
-	// TODO At the end, when the program is finished, remove prints in console that
-	// were used for debugging. And remove code and libraries that are not being
-	// used
+	// when bigger rows and columns. Or a standard size that is ok even on the
+	// maximum field size (30 * 30)
+	// TODO solve bug: when loading game, some parts of the ships of the opponent
+	// are in different positions (at least when playing against computer)
+	// TODO in SpielErstellen, add a verification process to check if the field size
+	// is between 5 and 30. Also add process to verify if it is possible to place
+	// all the ships according to the Field size. For example: it is impossible to
+	// place 3 ships of size 5 in a field of size 5 * 5, so the program should
+	// display an error message
 
 	// Graphische Oberfläche aufbauen und anzeigen.
-
-	/*
-	 * public static void startGameFrame(SpielTestNew spielTestFrame) { (new
-	 * Thread() {
-	 * 
-	 * @Override public void run() { try { spielTestFrame.start();
-	 * 
-	 * } catch (IOException e1) { // TODO Auto-generated catch block
-	 * e1.printStackTrace(); } } }).start(); }
-	 * 
-	 * public static void startGameFrameNoUI(SpielComputerNoUI spielNoUI) { (new
-	 * Thread() {
-	 * 
-	 * @Override public void run() { try { spielNoUI.start();
-	 * 
-	 * } catch (IOException e1) { // TODO Auto-generated catch block
-	 * e1.printStackTrace(); } } }).start(); }
-	 */
 
 	public static void start() {
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
