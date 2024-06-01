@@ -490,9 +490,9 @@ public class Player {
 		// Beim Schließen des Fensters (z. B. durch Drücken des
 		// X-Knopfs in Windows) soll das Programm beendet werden.
 		this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		// Center the window on the screen
-		this.mainFrame.setLocationRelativeTo(null);
+		
+		// set Minimum size
+		this.mainFrame.setMinimumSize(new Dimension(1200, 500));
 
 		// Der Inhalt des Fensters soll von einem BoxLayout-Manager
 		// verwaltet werden, der seine Bestandteile vertikal (von
@@ -573,11 +573,17 @@ public class Player {
 			// Menüzeile zum Fenster hinzufügen.
 			mainFrame.setJMenuBar(menuBar);
 		}
+		
 
 		// Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
 		// und das Fenster anzeigen (setVisible).
 		this.mainFrame.pack();
 		this.mainFrame.setVisible(true);
+		
+		// Center the window on the screen
+		mainFrame.setLocationRelativeTo(null);
+		
+
 	}
 
 	private String getShipsSettingAsString() {

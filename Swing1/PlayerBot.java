@@ -221,6 +221,9 @@ public class PlayerBot {
 		// X-Knopfs in Windows) soll das Programm beendet werden.
 		this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+		// set Minimum size
+		this.mainFrame.setMinimumSize(new Dimension(1200, 500));
+
 		// Center the window on the screen
 		this.mainFrame.setLocationRelativeTo(null);
 
@@ -275,6 +278,9 @@ public class PlayerBot {
 		// und das Fenster anzeigen (setVisible).
 		this.mainFrame.pack();
 		this.mainFrame.setVisible(true);
+
+		// Center the window on the screen
+		mainFrame.setLocationRelativeTo(null);
 
 	}
 
@@ -598,11 +604,11 @@ public class PlayerBot {
 			}
 		}
 	}
-	
 
 	private boolean saveGameClient(String gameId) {
 		// create folder to save game if it does not exist
-		String directoryPath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath() + "/savedGamesAsClient/";
+		String directoryPath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+				+ "/savedGamesAsClient/";
 		// Decode URL encoding
 		directoryPath = URLDecoder.decode(directoryPath, StandardCharsets.UTF_8);
 
@@ -653,7 +659,7 @@ public class PlayerBot {
 		}
 
 	}
-	
+
 	private Map<String, String> deSerializeHashMap(String filePath) throws ClassNotFoundException, IOException {
 		FileInputStream fis = new FileInputStream(filePath);
 		ObjectInputStream ois = new ObjectInputStream(fis);
@@ -697,7 +703,7 @@ public class PlayerBot {
 		}
 		return intArray;
 	}
-	
+
 	public static int[][] parseStringToInt2DArray(String str) {
 		// Remove the outer brackets and split into rows
 		String[] rows = str.substring(1, str.length() - 1).split("], \\[");
