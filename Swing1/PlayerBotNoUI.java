@@ -437,11 +437,24 @@ public class PlayerBotNoUI {
 	}
 
 	private boolean saveGameClient(String gameId) {
-		String currentDirectory = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+		// create folder to save game if it does not exist
+		String directoryPath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath() + "/savedGamesAsClient/";
 		// Decode URL encoding
-		currentDirectory = URLDecoder.decode(currentDirectory, StandardCharsets.UTF_8);
-		// get file where games are saved as client
-		String filePath = currentDirectory + "/savedGamesAsClient/" + gameId;
+		directoryPath = URLDecoder.decode(directoryPath, StandardCharsets.UTF_8);
+
+		// Ensure the directory exists
+		File directory = new File(directoryPath);
+		if (!directory.exists()) {
+			System.out.println("Directory does not exist, creating it.");
+			boolean dirCreated = directory.mkdirs();
+			if (!dirCreated) {
+				System.err.println("Failed to create directory: " + directoryPath);
+			}
+		} else {
+			System.out.println("Directory exists: " + directoryPath);
+		}
+
+		String filePath = directoryPath + gameId;
 
 		// save data in json file
 		Map<String, String> data = new HashMap<>();
