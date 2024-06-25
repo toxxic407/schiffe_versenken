@@ -55,11 +55,24 @@ class SpielFinden {
 			frame.setVisible(false);
 
 			// TODO Add logic to join the game using the selected IP address
-			new Thread(() -> {
+			/*new Thread(() -> {
 				// go to SchiffeAufstellen, start with Client role
 				new SchiffeAufstellen(menuFrame, false);
 
-			}).start();
+			}).start();*/
+			
+			// TODO Add logic to join the game using the selected IP address
+			class SchiffeAufstellenWorker extends SwingWorker<Void, Void>
+			{
+			    protected Void doInBackground() throws Exception
+			    {
+			    	// go to SchiffeAufstellen, start with Client role
+			        new SchiffeAufstellen(menuFrame, false);
+					return null;
+			    }
+			}
+
+			new SchiffeAufstellenWorker().execute();
 
 		} else {
 			// Show a warning message if no game is selected

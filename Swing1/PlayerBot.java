@@ -42,6 +42,7 @@ public class PlayerBot {
 	private boolean areClientFieldShipsDone = false;
 	private boolean isOpponentReady = false;
 	private Socket s;
+	public ServerSocket ss;
 
 	public PlayerBot(JFrame menuFrame, int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4,
 			int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
@@ -249,7 +250,7 @@ public class PlayerBot {
 
 		// Friendly field
 		JPanel friendlyContainer = new JPanel(new BorderLayout());
-		JLabel friendlyLabel = new JLabel("Ihres Spielfeld", JLabel.CENTER);
+		JLabel friendlyLabel = new JLabel("Ihr Spielfeld", JLabel.CENTER);
 		friendlyPanel = new JPanel();
 		spawnFriendlyField();
 		friendlyContainer.add(friendlyLabel, BorderLayout.NORTH);
@@ -308,13 +309,28 @@ public class PlayerBot {
 	}
 
 	public void start() {
-		new Thread(() -> {
+		/*new Thread(() -> {
 			try {
 				runGame();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}).start();
+		}).start();*/
+		
+		class GameWorker extends SwingWorker<Void, Void>
+		{
+		    protected Void doInBackground() throws Exception
+		    {
+		        try {
+					runGame();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return null;
+		    }
+		}
+
+		new GameWorker().execute();
 	}
 
 	private void manageSocketConnection() throws IOException {
@@ -343,7 +359,7 @@ public class PlayerBot {
 			System.out.println();
 			System.out.println("Waiting for client connection ...");
 
-			ServerSocket ss = new ServerSocket(port);
+			this.ss = new ServerSocket(port);
 			this.s = ss.accept();
 
 			System.out.println("Connection established.");
@@ -666,7 +682,7 @@ public class PlayerBot {
 		@SuppressWarnings("unchecked")
 		Map<String, String> map = (Map<String, String>) ois.readObject();
 		ois.close();
-		System.out.println("De Serialized HashMap data  saved in hashmap.ser");
+		System.out.println("Deserialized HashMap data  saved in hashmap.ser");
 		return map;
 	}
 
@@ -862,7 +878,7 @@ public class PlayerBot {
 					isPlayersTurn = false;
 					spawnFriendlyField();
 					spawnEnemyField();
-					JOptionPane.showMessageDialog(mainFrame, "You lost :(");
+					JOptionPane.showMessageDialog(mainFrame, "Du hast verloren :(");
 				} else if (isPlayersTurn) // if player did not lose and is its turn, attack
 				{
 					attack();
@@ -915,7 +931,7 @@ public class PlayerBot {
 					// System.out.println(role + " won."); isPlayersTurn = false;
 					spawnFriendlyField();
 					spawnEnemyField();
-					JOptionPane.showMessageDialog(this.mainFrame, "You won! :)");
+					JOptionPane.showMessageDialog(this.mainFrame, "Du hast gewonnen! :)");
 				} else if (isPlayersTurn) // if player did not win and is its turn, continue attack
 				{
 					attack();
@@ -954,6 +970,9 @@ public class PlayerBot {
 		// EOF ins Socket "schreiben" und das Programm explizit beenden // (weil es
 		// sonst weiterlaufen würde, bis der Benutzer das Hauptfenster // schließt).
 		this.s.shutdownOutput();
+		//Fully close Socket afterwards
+		this.s.close();
+		this.ss.close();
 		System.out.println("Connection closed.");
 		System.exit(0);
 

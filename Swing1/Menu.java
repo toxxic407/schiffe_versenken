@@ -7,20 +7,36 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 class Menu {
-	// TODO close sockets when game ends for all 3 player types (also when any
-	// player gets disconnected). So that other games can be created
-	// TODO use Swing Workers instead of Thread()
-	// TODO make the size of the buttons on the field scale according to the number
-	// of rows and columns (smaller rows and columns -> bigger buttons, the opposite
-	// when bigger rows and columns. Or a standard size that is ok even on the
-	// maximum field size (30 * 30)
+	//TODO unbind from adress in order to start another game
+	
+	//TODO Write Manual
+	
+	//Optional
+	//TODO remove all red areas besides the ones next to ships
+	
+	//Possibly already fixed
 	// TODO solve bug: when loading game, some parts of the ships of the opponent
 	// are in different positions (at least when playing against computer)
+	
+	
+	//Done
+	// TODO close sockets when game ends for all 3 player types (also when any
+	// player gets disconnected). So that other games can be created
+	
+	//TODO Fix Grammar
+	
 	// TODO in SpielErstellen, add a verification process to check if the field size
 	// is between 5 and 30. Also add process to verify if it is possible to place
 	// all the ships according to the Field size. For example: it is impossible to
 	// place 3 ships of size 5 in a field of size 5 * 5, so the program should
 	// display an error message
+	
+	// TODO make the size of the buttons on the field scale according to the number
+	// of rows and columns (smaller rows and columns -> bigger buttons, the opposite
+	// when bigger rows and columns. Or a standard size that is ok even on the
+	// maximum field size (30 * 30)
+	
+	// TODO use Swing Workers instead of Thread() only four occurences (Player.java, PlayerBot.java, SchiffeAufstellen.java and SpielFinden.java)
 
 	// Graphische Oberfläche aufbauen und anzeigen.
 
@@ -48,10 +64,10 @@ class Menu {
 		frame.add(Box.createGlue());
 
 		// Button: Gegen anderen Spieler spielen
-		JButton buttonGegenSpieler = new JButton("Gegen anderen Speieler spielen");
+		JButton buttonGegenSpieler = new JButton("Gegen anderen Spieler spielen");
 		buttonGegenSpieler.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonGegenSpieler.addActionListener((e) -> {
-			System.out.println("Knopf gedrückt: Gegen anderen Speieler spielen");
+			System.out.println("Knopf gedrückt: Gegen anderen Spieler spielen");
 
 			frame.setVisible(false); // this will close current login box window
 
@@ -65,10 +81,10 @@ class Menu {
 		frame.add(Box.createVerticalStrut(50));
 
 		// Button: Gegen den Computer Spielen
-		JButton buttonGegenComputer = new JButton("Gegen den Computer spielen");
+		JButton buttonGegenComputer = new JButton("Gegen Computer spielen");
 		buttonGegenComputer.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonGegenComputer.addActionListener((e) -> {
-			System.out.println("Knopf gedrückt: Gegen den Computer spielen");
+			System.out.println("Knopf gedrückt: Gegen Computer spielen");
 
 			frame.setVisible(false); // this will close current login box window
 

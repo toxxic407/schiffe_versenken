@@ -746,6 +746,8 @@ public class PlayerBotNoUI {
 			// schließt).
 
 			s.shutdownOutput();
+			//Fully close Socket afterwards
+			s.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -35,6 +35,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 import Components.MenuBar;
 
@@ -346,14 +347,41 @@ public class SchiffeAufstellen {
 		fieldGridPanel = new JPanel();
 
 		fieldGridPanel.setLayout(new GridLayout(fieldSize, fieldSize));
-
+		
+		//calculate appropriate button size once
+		int buttonsize;
+		
+		switch(fieldSize/5) {
+		  case 1:
+			  buttonsize = 80;
+		    break;
+		  case 2:
+			  buttonsize = 55;
+		    break;
+		  case 3:
+			  buttonsize = 39;
+			break;
+		  case 4:
+			  buttonsize = 30;
+			    break;
+		  case 5:
+			  buttonsize = 25;
+			    break;
+		  case 6:
+			  buttonsize = 25;
+			    break;
+		  default:
+			  buttonsize = 5;
+		    // code block
+		}
 		// iterate over field and display buttons accordingly
 		for (int i = 0; i < fieldSize; i++) {
 			for (int j = 0; j < fieldSize; j++) {
 				int row = i;
 				int column = j;
 				JButton button = new JButton();
-				button.setPreferredSize(new Dimension(50, 50));
+				button.setPreferredSize(new Dimension(buttonsize, buttonsize));
+				//button.setPreferredSize(new Dimension(50, 50));
 
 				// change color of button according to value in the field (ship part or water)
 				if (field[row][column] == 0) {
@@ -568,9 +596,20 @@ public class SchiffeAufstellen {
 			PlayerBotNoUI playerOpponentBot = new PlayerBotNoUI(this.field.length, anzahlSchiffeGroesse5,
 					anzahlSchiffeGroesse4, anzahlSchiffeGroesse3, anzahlSchiffeGroesse2);
 
-			new Thread(() -> {
+			/*new Thread(() -> {
 				playerOpponentBot.start();
-			}).start();
+			}).start();*/
+			
+			class BotWorker extends SwingWorker<Void, Void>
+			{
+			    protected Void doInBackground() throws Exception
+			    {
+			        playerOpponentBot.start();
+			        return null;
+			    }
+			}
+
+			new BotWorker().execute();
 
 		}
 	}

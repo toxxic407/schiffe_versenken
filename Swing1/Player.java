@@ -44,6 +44,7 @@ public class Player {
 	private boolean areClientFieldShipsDone = false;
 	private boolean isOpponentReady = false;
 	public Socket s;
+	public ServerSocket ss;
 
 	public Player(JFrame menuFrame, int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4,
 			int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
@@ -89,6 +90,34 @@ public class Player {
 		enemyGridPanel.removeAll();
 		enemyGridPanel = new JPanel();
 		enemyGridPanel.setLayout(new GridLayout(this.friendlyField.length, this.friendlyField.length));
+		
+		//calculate appropriate button size once
+				int buttonsize;
+				
+				switch(fieldSize/5) {
+				  case 1:
+					  buttonsize = 100;
+				    break;
+				  case 2:
+					  buttonsize = 55;
+				    break;
+				  case 3:
+					  buttonsize = 48;
+					break;
+				  case 4:
+					  buttonsize = 35;
+					    break;
+				  case 5:
+					  buttonsize = 25;
+					    break;
+				  case 6:
+					  buttonsize = 25;
+					    break;
+				  default:
+					  buttonsize = 5;
+				    // code block
+				}
+		
 		for (int i = 0; i < friendlyField.length; i++) {
 			int row = i;
 			for (int j = 0; j < friendlyField.length; j++) {
@@ -97,7 +126,8 @@ public class Player {
 				// JButton temp = new JButton(Integer.toString(i + 1));
 				JButton button = new JButton();
 				button.setFont(new Font("Arial", Font.PLAIN, 8));
-				button.setPreferredSize(new Dimension(45, 45));
+				button.setPreferredSize(new Dimension(buttonsize, buttonsize));
+				//button.setPreferredSize(new Dimension(45, 45));
 
 				// if it is not players turn, deactivate button to attack
 				if (isPlayersTurn == false || this.isOpponentReady == false) {
@@ -158,12 +188,41 @@ public class Player {
 		friendlyGridPanel.removeAll();
 		friendlyGridPanel = new JPanel();
 		friendlyGridPanel.setLayout(new GridLayout(this.friendlyField.length, this.friendlyField.length));
+		
+		//calculate appropriate button size once
+				int buttonsize;
+				
+				switch(fieldSize/5) {
+				  case 1:
+					  buttonsize = 100;
+				    break;
+				  case 2:
+					  buttonsize = 55;
+				    break;
+				  case 3:
+					  buttonsize = 48;
+					break;
+				  case 4:
+					  buttonsize = 35;
+					    break;
+				  case 5:
+					  buttonsize = 25;
+					    break;
+				  case 6:
+					  buttonsize = 25;
+					    break;
+				  default:
+					  buttonsize = 5;
+				    // code block
+				}
+		
 		for (int i = 0; i < enemyField.length; i++) {
 			for (int j = 0; j < enemyField.length; j++) {
 				// JButton temp = new JButton(Integer.toString(i + 1));
 				JButton button = new JButton();
 				button.setFont(new Font("Arial", Font.PLAIN, 8));
-				button.setPreferredSize(new Dimension(45, 45));
+				button.setPreferredSize(new Dimension(buttonsize, buttonsize));
+				//button.setPreferredSize(new Dimension(45, 45));
 				// friendly field is completely deactivated
 				button.setEnabled(false);
 
@@ -516,7 +575,7 @@ public class Player {
 
 		// Friendly field
 		JPanel friendlyContainer = new JPanel(new BorderLayout());
-		JLabel friendlyLabel = new JLabel("Ihres Spielfeld", JLabel.CENTER);
+		JLabel friendlyLabel = new JLabel("Ihr Spielfeld", JLabel.CENTER);
 		friendlyPanel = new JPanel();
 		spawnFriendlyField();
 		friendlyContainer.add(friendlyLabel, BorderLayout.NORTH);
@@ -610,13 +669,20 @@ public class Player {
 	}
 
 	public void start() {
-		new Thread(() -> {
-			try {
-				runGame();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}).start();
+		class GameWorker extends SwingWorker<Void, Void>
+		{
+		    protected Void doInBackground() throws Exception
+		    {
+		        try {
+					runGame();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				return null;
+		    }
+		}
+
+		new GameWorker().execute();
 	}
 
 	private void manageSocketConnection() throws IOException {
@@ -645,7 +711,7 @@ public class Player {
 			System.out.println();
 			System.out.println("Waiting for client connection ...");
 
-			ServerSocket ss = new ServerSocket(port);
+			ss = new ServerSocket(port);
 			this.s = ss.accept();
 		} else {
 
@@ -999,7 +1065,7 @@ public class Player {
 					isPlayersTurn = false;
 					spawnFriendlyField();
 					spawnEnemyField();
-					JOptionPane.showMessageDialog(this.mainFrame, "You lost :(");
+					JOptionPane.showMessageDialog(this.mainFrame, "Du hast verloren :(");
 				}
 
 			}
@@ -1056,7 +1122,7 @@ public class Player {
 					isPlayersTurn = false;
 					spawnFriendlyField();
 					spawnEnemyField();
-					JOptionPane.showMessageDialog(this.mainFrame, "You won! :)");
+					JOptionPane.showMessageDialog(this.mainFrame, "Du hast gewonnen! :)");
 				}
 
 			}
@@ -1091,6 +1157,9 @@ public class Player {
 		// EOF ins Socket "schreiben" und das Programm explizit beenden // (weil es
 		// sonst weiterlaufen würde, bis der Benutzer das Hauptfenster // schließt).
 		this.s.shutdownOutput();
+		//Fully close Socket afterwards
+		this.s.close();
+		this.ss.close();
 		System.out.println("Connection closed.");
 		System.exit(0);
 

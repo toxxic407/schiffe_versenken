@@ -169,7 +169,7 @@ public class SpielTest {
 		mainFrame.add(enemyPanel);
 
 		// add player's field
-		JLabel label2 = new JLabel("Ihres Spielfeld");
+		JLabel label2 = new JLabel("Ihr Spielfeld");
 		label2.setAlignmentX(Component.CENTER_ALIGNMENT);
 		mainFrame.add(label2);
 
@@ -232,6 +232,8 @@ public class SpielTest {
 
 		// Socketverbindung zur anderen "Seite" herstellen.
 		Socket s;
+		ServerSocket ss;
+		Boolean ss_bool=false;
 		if (args.length == 0) {
 			role = "Server";
 
@@ -254,7 +256,8 @@ public class SpielTest {
 			System.out.println();
 			System.out.println("Waiting for client connection ...");
 
-			ServerSocket ss = new ServerSocket(port);
+			ss = new ServerSocket(port);
+			ss_bool = true;
 			s = ss.accept();
 		} else {
 			role = "Client";
@@ -388,6 +391,11 @@ public class SpielTest {
 		// (weil es sonst weiterlaufen würde, bis der Benutzer das Hauptfenster
 		// schließt).
 		s.shutdownOutput();
+		//Fully close Socket afterwards
+		s.close();
+		if(ss_bool) {
+		ss.close();
+		}
 		System.out.println("Connection closed.");
 		System.exit(0);
 

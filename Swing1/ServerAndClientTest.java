@@ -9,7 +9,8 @@ public class ServerAndClientTest {
     private static String role;		// Rolle: Server oder Client.
     private static BufferedReader in;	// Verpackung des Socket-Eingabestroms.
     private static Writer out;		// Verpackung des Socket-Ausgabestroms.
-    private static JButton button;	// Der o. g. Knopf.
+    private static JButton button;
+    public Serversocket ss;// Der o. g. Knopf.
     
     // Graphische Oberfläche aufbauen und anzeigen.
     private static void startGui () {
@@ -75,6 +76,7 @@ public class ServerAndClientTest {
 		final int port = 50000;
 
 		// Socketverbindung zur anderen "Seite" herstellen.
+		ServerSocket ss;
 		Socket s;
 		if (args.length == 0) {
 		    role = "Server";
@@ -97,7 +99,7 @@ public class ServerAndClientTest {
 		    System.out.println();
 		    System.out.println("Waiting for client connection ...");
 
-		    ServerSocket ss = new ServerSocket(port);
+		    ss = new ServerSocket(port);
 		    s = ss.accept();
 		}
 		else {
@@ -134,6 +136,9 @@ public class ServerAndClientTest {
 		// (weil es sonst weiterlaufen würde, bis der Benutzer das Hauptfenster 
 		// schließt).
 		s.shutdownOutput();
+		//Fully close Socket afterwards
+		ss.close();
+		s.close();
 		System.out.println("Connection closed.");
 		System.exit(0);
 		
