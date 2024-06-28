@@ -444,7 +444,8 @@ public class Player {
 
 	private boolean saveGameClient(String gameId) {
 		// create folder to save game if it does not exist
-		String directoryPath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath() + "/savedGamesAsClient/";
+		//String directoryPath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath() + "/SchiffeVersenkenSavedGamesAsClient/";
+		String directoryPath = System.getProperty("user.dir") + "/SchiffeVersenkenSavedGamesAsClient/";
 		// Decode URL encoding
 		directoryPath = URLDecoder.decode(directoryPath, StandardCharsets.UTF_8);
 
@@ -498,12 +499,13 @@ public class Player {
 
 	private boolean loadGameClient(String gameId) {
 		// TODO
-		String currentDirectory = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+		//String currentDirectory = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+		String currentDirectory = System.getProperty("user.dir");
 		// Decode URL encoding
 		currentDirectory = URLDecoder.decode(currentDirectory, StandardCharsets.UTF_8);
 
 		// get file where games are saved as client
-		String filePath = currentDirectory + "/savedGamesAsClient/" + gameId + ".ser";
+		String filePath = currentDirectory + "/SchiffeVersenkenSavedGamesAsClient/" + gameId + ".ser";
 
 		// get data from file
 		try {
