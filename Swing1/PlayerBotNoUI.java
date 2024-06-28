@@ -596,7 +596,28 @@ public class PlayerBotNoUI {
 		// Manipulationen an der Oberfläche sollten aber mittels invokeLater
 		// (oder invokeAndWait) ausgeführt werden.
 		while (true) {
-			String line = this.in.readLine(); // read line from socket
+			String line = "";
+			try {
+				line = in.readLine(); // read line from socket
+			} catch (Exception e) {
+				try {
+					// EOF ins Socket "schreiben" und das Programm explizit beenden // (weil es
+					// sonst weiterlaufen würde, bis der Benutzer das Hauptfenster // schließt).
+					this.s.shutdownOutput();
+					// Fully close Socket
+					s.close();
+//					ss.close();
+					System.out.println("Connection closed.");
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+
+				String message = "Die Verbindung mit dem anderen Spieler ist unterbrochen worden.";
+				JOptionPane.showMessageDialog(new JFrame(), message, "Fehler", JOptionPane.ERROR_MESSAGE);
+
+				break;
+			}
+			
 			System.out.println("received: " + line);
 			String[] responseList = line.split(" "); // split line based on whitespace
 
@@ -656,6 +677,7 @@ public class PlayerBotNoUI {
 				if (countValueOcurrencesInArray(friendlyField, 1) == 0) {
 					System.out.println("lost.");
 					isPlayersTurn = false;
+					break;
 
 				} else if (isPlayersTurn) // if player did not lose and is its turn, attack
 				{
@@ -710,6 +732,7 @@ public class PlayerBotNoUI {
 				if (countValueOcurrencesInArray(enemyField, 3) == totalShipPartsCount) {
 					System.out.println("won.");
 					isPlayersTurn = false;
+					break;
 
 				} else if (isPlayersTurn) // if player did not win and is its turn, continue attack
 				{
@@ -718,11 +741,6 @@ public class PlayerBotNoUI {
 
 			}
 
-			if (line == null)
-				break;
-			/*
-			 * SwingUtilities.invokeLater( () -> { button.setEnabled(true); } );
-			 */
 		}
 	}
 
@@ -744,15 +762,24 @@ public class PlayerBotNoUI {
 			// (weil es sonst weiterlaufen würde, bis der Benutzer das Hauptfenster
 			// schließt).
 
-			s.shutdownOutput();
-			//Fully close Socket afterwards
-			s.close();
+			try {
+				// EOF ins Socket "schreiben" und das Programm explizit beenden // (weil es
+				// sonst weiterlaufen würde, bis der Benutzer das Hauptfenster // schließt).
+				this.s.shutdownOutput();
+				// Fully close Socket afterwards
+				this.s.close();
+//				this.ss.close();
+				System.out.println("Connection closed.");
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+			
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("Connection closed.");
-		System.exit(0);
+		//System.exit(0);
 
 	}
 

@@ -45,6 +45,7 @@ public class Player {
 	private boolean isOpponentReady = false;
 	public Socket s;
 	public ServerSocket ss;
+	private JMenuBar MenuBar;
 
 	public Player(JFrame menuFrame, int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4,
 			int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
@@ -90,34 +91,34 @@ public class Player {
 		enemyGridPanel.removeAll();
 		enemyGridPanel = new JPanel();
 		enemyGridPanel.setLayout(new GridLayout(this.friendlyField.length, this.friendlyField.length));
-		
-		//calculate appropriate button size once
-				int buttonsize;
-				
-				switch(fieldSize/5) {
-				  case 1:
-					  buttonsize = 100;
-				    break;
-				  case 2:
-					  buttonsize = 55;
-				    break;
-				  case 3:
-					  buttonsize = 48;
-					break;
-				  case 4:
-					  buttonsize = 35;
-					    break;
-				  case 5:
-					  buttonsize = 25;
-					    break;
-				  case 6:
-					  buttonsize = 25;
-					    break;
-				  default:
-					  buttonsize = 5;
-				    // code block
-				}
-		
+
+		// calculate appropriate button size once
+		int buttonsize;
+
+		switch (fieldSize / 5) {
+		case 1:
+			buttonsize = 100;
+			break;
+		case 2:
+			buttonsize = 55;
+			break;
+		case 3:
+			buttonsize = 48;
+			break;
+		case 4:
+			buttonsize = 35;
+			break;
+		case 5:
+			buttonsize = 25;
+			break;
+		case 6:
+			buttonsize = 25;
+			break;
+		default:
+			buttonsize = 5;
+			// code block
+		}
+
 		for (int i = 0; i < friendlyField.length; i++) {
 			int row = i;
 			for (int j = 0; j < friendlyField.length; j++) {
@@ -127,7 +128,7 @@ public class Player {
 				JButton button = new JButton();
 				button.setFont(new Font("Arial", Font.PLAIN, 8));
 				button.setPreferredSize(new Dimension(buttonsize, buttonsize));
-				//button.setPreferredSize(new Dimension(45, 45));
+				// button.setPreferredSize(new Dimension(45, 45));
 
 				// if it is not players turn, deactivate button to attack
 				if (isPlayersTurn == false || this.isOpponentReady == false) {
@@ -188,41 +189,41 @@ public class Player {
 		friendlyGridPanel.removeAll();
 		friendlyGridPanel = new JPanel();
 		friendlyGridPanel.setLayout(new GridLayout(this.friendlyField.length, this.friendlyField.length));
-		
-		//calculate appropriate button size once
-				int buttonsize;
-				
-				switch(fieldSize/5) {
-				  case 1:
-					  buttonsize = 100;
-				    break;
-				  case 2:
-					  buttonsize = 55;
-				    break;
-				  case 3:
-					  buttonsize = 48;
-					break;
-				  case 4:
-					  buttonsize = 35;
-					    break;
-				  case 5:
-					  buttonsize = 25;
-					    break;
-				  case 6:
-					  buttonsize = 25;
-					    break;
-				  default:
-					  buttonsize = 5;
-				    // code block
-				}
-		
+
+		// calculate appropriate button size once
+		int buttonsize;
+
+		switch (fieldSize / 5) {
+		case 1:
+			buttonsize = 100;
+			break;
+		case 2:
+			buttonsize = 55;
+			break;
+		case 3:
+			buttonsize = 48;
+			break;
+		case 4:
+			buttonsize = 35;
+			break;
+		case 5:
+			buttonsize = 25;
+			break;
+		case 6:
+			buttonsize = 25;
+			break;
+		default:
+			buttonsize = 5;
+			// code block
+		}
+
 		for (int i = 0; i < enemyField.length; i++) {
 			for (int j = 0; j < enemyField.length; j++) {
 				// JButton temp = new JButton(Integer.toString(i + 1));
 				JButton button = new JButton();
 				button.setFont(new Font("Arial", Font.PLAIN, 8));
 				button.setPreferredSize(new Dimension(buttonsize, buttonsize));
-				//button.setPreferredSize(new Dimension(45, 45));
+				// button.setPreferredSize(new Dimension(45, 45));
 				// friendly field is completely deactivated
 				button.setEnabled(false);
 
@@ -444,7 +445,9 @@ public class Player {
 
 	private boolean saveGameClient(String gameId) {
 		// create folder to save game if it does not exist
-		//String directoryPath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath() + "/SchiffeVersenkenSavedGamesAsClient/";
+		// String directoryPath =
+		// this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+		// + "/SchiffeVersenkenSavedGamesAsClient/";
 		String directoryPath = System.getProperty("user.dir") + "/SchiffeVersenkenSavedGamesAsClient/";
 		// Decode URL encoding
 		directoryPath = URLDecoder.decode(directoryPath, StandardCharsets.UTF_8);
@@ -499,7 +502,8 @@ public class Player {
 
 	private boolean loadGameClient(String gameId) {
 		// TODO
-		//String currentDirectory = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+		// String currentDirectory =
+		// this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
 		String currentDirectory = System.getProperty("user.dir");
 		// Decode URL encoding
 		currentDirectory = URLDecoder.decode(currentDirectory, StandardCharsets.UTF_8);
@@ -543,6 +547,36 @@ public class Player {
 		}
 	}
 
+	private void createCustomMenuBar() {
+		this.MenuBar = new JMenuBar();
+		{
+			JMenu menu = new JMenu("Menü");
+			{
+				JMenuItem item = new JMenuItem("Menü öffnen");
+				item.addActionListener((e) -> {
+					System.out.println("File -> Menü öffnen");
+
+					closeConnection();
+
+					mainFrame.dispose(); // hide current window
+					menuFrame.setVisible(true); // show Menu window
+
+				});
+				menu.add(item);
+			}
+			{
+				JMenuItem item = new JMenuItem("Programm beenden");
+				item.addActionListener((e) -> {
+					System.out.println("File -> Programm beenden");
+					System.exit(0);
+				});
+				menu.add(item);
+			}
+			MenuBar.add(menu);
+			mainFrame.setJMenuBar(MenuBar);
+		}
+	}
+	
 	// Graphische Oberfläche aufbauen und anzeigen.
 	private void startGui() {
 		// Hauptfenster mit Titelbalken etc. (JFrame) erzeugen.
@@ -551,7 +585,7 @@ public class Player {
 		// Beim Schließen des Fensters (z. B. durch Drücken des
 		// X-Knopfs in Windows) soll das Programm beendet werden.
 		this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 		// set Minimum size
 		this.mainFrame.setMinimumSize(new Dimension(1200, 500));
 
@@ -624,26 +658,17 @@ public class Player {
 		mainFrame.add(Box.createVerticalStrut(25));
 
 		if (menuFrame != null) {
-			// Menüzeile (JMenuBar) erzeugen und einzelne Menüs (JMenu)
-			// mit Menüpunkten (JMenuItem) hinzufügen.
-			// Jeder Menüpunkt ist eigentlich ein Knopf, dem wie oben
-			// eine anonyme Funktion zugeordnet werden kann.
-			// (Hier exemplarisch nur für einen Menüpunkt.)
-			JMenuBar menuBar = new MenuBar(mainFrame, menuFrame);
-
-			// Menüzeile zum Fenster hinzufügen.
-			mainFrame.setJMenuBar(menuBar);
+			createCustomMenuBar();
+			
 		}
-		
 
 		// Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
 		// und das Fenster anzeigen (setVisible).
 		this.mainFrame.pack();
 		this.mainFrame.setVisible(true);
-		
+
 		// Center the window on the screen
 		mainFrame.setLocationRelativeTo(null);
-		
 
 	}
 
@@ -671,17 +696,15 @@ public class Player {
 	}
 
 	public void start() {
-		class GameWorker extends SwingWorker<Void, Void>
-		{
-		    protected Void doInBackground() throws Exception
-		    {
-		        try {
+		class GameWorker extends SwingWorker<Void, Void> {
+			protected Void doInBackground() throws Exception {
+				try {
 					runGame();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 				return null;
-		    }
+			}
 		}
 
 		new GameWorker().execute();
@@ -974,6 +997,19 @@ public class Player {
 		}
 	}
 
+	private void closeConnection()
+	{
+		try {
+			// Fully close Socket
+			s.shutdownOutput();
+			s.close();
+			ss.close();
+			System.out.println("Connection closed.");
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
 	private void manageBattle() throws IOException {
 
 		System.out.println("is " + role + " turn: " + isPlayersTurn);
@@ -984,10 +1020,24 @@ public class Player {
 		// mittels invokeLater // (oder invokeAndWait) ausgeführt werden.
 
 		while (true) {
+			String line = "";
+			try {
+				line = in.readLine(); // read line from socket
+			} catch (Exception e) {
+				closeConnection();
 
-			String line = in.readLine(); // read line from socket
+				String message = "Die Verbindung mit dem anderen Spieler ist unterbrochen worden.";
+				JOptionPane.showMessageDialog(new JFrame(), message, "Fehler", JOptionPane.ERROR_MESSAGE);
+
+				break;
+			}
+
 			System.out.println("received: " + line);
 			String[] responseList = line.split(" "); // split line based on whitespace
+			
+			if (line == "null") {
+				closeConnection();
+			}
 
 			// if save game message is received
 			if (responseList[0].equals("save")) {
@@ -1068,6 +1118,7 @@ public class Player {
 					spawnFriendlyField();
 					spawnEnemyField();
 					JOptionPane.showMessageDialog(this.mainFrame, "Du hast verloren :(");
+					break;
 				}
 
 			}
@@ -1125,12 +1176,10 @@ public class Player {
 					spawnFriendlyField();
 					spawnEnemyField();
 					JOptionPane.showMessageDialog(this.mainFrame, "Du hast gewonnen! :)");
+					break;
 				}
 
 			}
-
-			if (line == null)
-				break;
 
 		}
 
@@ -1156,14 +1205,9 @@ public class Player {
 
 		manageBattle();
 
-		// EOF ins Socket "schreiben" und das Programm explizit beenden // (weil es
-		// sonst weiterlaufen würde, bis der Benutzer das Hauptfenster // schließt).
-		this.s.shutdownOutput();
-		//Fully close Socket afterwards
-		this.s.close();
-		this.ss.close();
-		System.out.println("Connection closed.");
-		System.exit(0);
+		closeConnection();
+
+		//System.exit(0);
 
 	}
 

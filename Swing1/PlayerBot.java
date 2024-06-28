@@ -43,6 +43,7 @@ public class PlayerBot {
 	private boolean isOpponentReady = false;
 	private Socket s;
 	public ServerSocket ss;
+	private JMenuBar MenuBar;
 
 	public PlayerBot(JFrame menuFrame, int[][] field, int anzahlSchiffeGroesse5, int anzahlSchiffeGroesse4,
 			int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
@@ -212,6 +213,37 @@ public class PlayerBot {
 		}
 
 	}
+	
+	private void createCustomMenuBar() {
+		this.MenuBar = new JMenuBar();
+		{
+			JMenu menu = new JMenu("Menü");
+			{
+				JMenuItem item = new JMenuItem("Menü öffnen");
+				item.addActionListener((e) -> {
+					System.out.println("File -> Menü öffnen");
+
+					closeConnection();
+
+					mainFrame.dispose(); // hide current window
+					menuFrame.setVisible(true); // show Menu window
+
+				});
+				menu.add(item);
+			}
+			{
+				JMenuItem item = new JMenuItem("Programm beenden");
+				item.addActionListener((e) -> {
+					System.out.println("File -> Programm beenden");
+					System.exit(0);
+				});
+				menu.add(item);
+			}
+			MenuBar.add(menu);
+			mainFrame.setJMenuBar(MenuBar);
+		}
+	}
+	
 
 	// Graphische Oberfläche aufbauen und anzeigen.
 	private void startGui() {
@@ -264,15 +296,8 @@ public class PlayerBot {
 		this.mainFrame.add(fieldsPanel);
 
 		if (menuFrame != null) {
-			// Menüzeile (JMenuBar) erzeugen und einzelne Menüs (JMenu)
-			// mit Menüpunkten (JMenuItem) hinzufügen.
-			// Jeder Menüpunkt ist eigentlich ein Knopf, dem wie oben
-			// eine anonyme Funktion zugeordnet werden kann.
-			// (Hier exemplarisch nur für einen Menüpunkt.)
-			JMenuBar menuBar = new MenuBar(mainFrame, menuFrame);
-
-			// Menüzeile zum Fenster hinzufügen.
-			mainFrame.setJMenuBar(menuBar);
+			createCustomMenuBar();
+			
 		}
 
 		// Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
@@ -309,25 +334,20 @@ public class PlayerBot {
 	}
 
 	public void start() {
-		/*new Thread(() -> {
-			try {
-				runGame();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}).start();*/
-		
-		class GameWorker extends SwingWorker<Void, Void>
-		{
-		    protected Void doInBackground() throws Exception
-		    {
-		        try {
+		/*
+		 * new Thread(() -> { try { runGame(); } catch (IOException e) {
+		 * e.printStackTrace(); } }).start();
+		 */
+
+		class GameWorker extends SwingWorker<Void, Void> {
+			protected Void doInBackground() throws Exception {
+				try {
 					runGame();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 				return null;
-		    }
+			}
 		}
 
 		new GameWorker().execute();
@@ -623,8 +643,9 @@ public class PlayerBot {
 
 	private boolean saveGameClient(String gameId) {
 		// create folder to save game if it does not exist
-		//String directoryPath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
-		//		+ "/SchiffeVersenkenSavedGamesAsClient/";
+		// String directoryPath =
+		// this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath()
+		// + "/SchiffeVersenkenSavedGamesAsClient/";
 		String directoryPath = System.getProperty("user.dir") + "/SchiffeVersenkenSavedGamesAsClient/";
 		// Decode URL encoding
 		directoryPath = URLDecoder.decode(directoryPath, StandardCharsets.UTF_8);
@@ -737,8 +758,9 @@ public class PlayerBot {
 	}
 
 	private boolean loadGameClient(String gameId) {
-		
-		//String currentDirectory = this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+
+		// String currentDirectory =
+		// this.getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
 		String currentDirectory = System.getProperty("user.dir");
 		// Decode URL encoding
 		currentDirectory = URLDecoder.decode(currentDirectory, StandardCharsets.UTF_8);
@@ -782,6 +804,19 @@ public class PlayerBot {
 		}
 	}
 
+	private void closeConnection()
+	{
+		try {
+			// Fully close Socket
+			s.shutdownOutput();
+			s.close();
+			ss.close();
+			System.out.println("Connection closed.");
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
 	private void manageBattle() throws IOException {
 
 		System.out.println("is " + role + " turn: " + isPlayersTurn);
@@ -798,7 +833,18 @@ public class PlayerBot {
 		// Manipulationen an der Oberfläche sollten aber mittels invokeLater
 		// (oder invokeAndWait) ausgeführt werden.
 		while (true) {
-			String line = in.readLine(); // read line from socket
+			String line = "";
+			try {
+				line = in.readLine(); // read line from socket
+			} catch (Exception e) {
+				closeConnection();
+
+				String message = "Die Verbindung mit dem anderen Spieler ist unterbrochen worden.";
+				JOptionPane.showMessageDialog(new JFrame(), message, "Fehler", JOptionPane.ERROR_MESSAGE);
+
+				break;
+			}
+
 			System.out.println("received: " + line);
 			String[] responseList = line.split(" "); // split line based on whitespace
 
@@ -881,6 +927,8 @@ public class PlayerBot {
 					spawnFriendlyField();
 					spawnEnemyField();
 					JOptionPane.showMessageDialog(mainFrame, "Du hast verloren :(");
+					break;
+					
 				} else if (isPlayersTurn) // if player did not lose and is its turn, attack
 				{
 					attack();
@@ -934,6 +982,8 @@ public class PlayerBot {
 					spawnFriendlyField();
 					spawnEnemyField();
 					JOptionPane.showMessageDialog(this.mainFrame, "Du hast gewonnen! :)");
+					break;
+					
 				} else if (isPlayersTurn) // if player did not win and is its turn, continue attack
 				{
 					attack();
@@ -941,11 +991,6 @@ public class PlayerBot {
 
 			}
 
-			if (line == null)
-				break;
-			/*
-			 * SwingUtilities.invokeLater( () -> { button.setEnabled(true); } );
-			 */
 		}
 	}
 
@@ -969,14 +1014,8 @@ public class PlayerBot {
 
 		manageBattle();
 
-		// EOF ins Socket "schreiben" und das Programm explizit beenden // (weil es
-		// sonst weiterlaufen würde, bis der Benutzer das Hauptfenster // schließt).
-		this.s.shutdownOutput();
-		//Fully close Socket afterwards
-		this.s.close();
-		this.ss.close();
-		System.out.println("Connection closed.");
-		System.exit(0);
+		closeConnection();
+		//System.exit(0);
 
 	}
 
