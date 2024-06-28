@@ -1001,12 +1001,18 @@ public class Player {
 	{
 		try {
 			// Fully close Socket
-			s.shutdownOutput();
-			s.close();
-			ss.close();
+			//s.shutdownOutput();
+			if (ss != null) {
+				ss.close();
+			}
+			
+			if (s != null) {
+				s.close();
+			}
+			
 			System.out.println("Connection closed.");
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (Exception e) {
+			System.out.println("Could not close connection.");
 		}
 	}
 	
@@ -1027,7 +1033,7 @@ public class Player {
 				closeConnection();
 
 				String message = "Die Verbindung mit dem anderen Spieler ist unterbrochen worden.";
-				JOptionPane.showMessageDialog(new JFrame(), message, "Fehler", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(mainFrame, message, "Fehler", JOptionPane.ERROR_MESSAGE);
 
 				break;
 			}
@@ -1035,8 +1041,15 @@ public class Player {
 			System.out.println("received: " + line);
 			String[] responseList = line.split(" "); // split line based on whitespace
 			
-			if (line == "null") {
+			System.out.println("line.equals(\"null\"): " + line.equals("null") );
+			
+			if (line.equals("null")) {
 				closeConnection();
+				
+				String message = "Die Verbindung mit dem anderen Spieler ist unterbrochen worden.";
+				JOptionPane.showMessageDialog(new JFrame(), message, "Fehler", JOptionPane.ERROR_MESSAGE);
+
+				break;
 			}
 
 			// if save game message is received

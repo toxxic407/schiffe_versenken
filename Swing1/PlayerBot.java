@@ -213,7 +213,7 @@ public class PlayerBot {
 		}
 
 	}
-	
+
 	private void createCustomMenuBar() {
 		this.MenuBar = new JMenuBar();
 		{
@@ -243,7 +243,6 @@ public class PlayerBot {
 			mainFrame.setJMenuBar(MenuBar);
 		}
 	}
-	
 
 	// Graphische Oberfläche aufbauen und anzeigen.
 	private void startGui() {
@@ -297,7 +296,7 @@ public class PlayerBot {
 
 		if (menuFrame != null) {
 			createCustomMenuBar();
-			
+
 		}
 
 		// Am Schluss (!) die optimale Fenstergröße ermitteln (pack)
@@ -808,15 +807,22 @@ public class PlayerBot {
 	{
 		try {
 			// Fully close Socket
-			s.shutdownOutput();
-			s.close();
-			ss.close();
+			//s.shutdownOutput();
+			if (ss != null) {
+				ss.close();
+			}
+			
+			if (s != null) {
+				s.close();
+			}
+			
 			System.out.println("Connection closed.");
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (Exception e) {
+			System.out.println("Could not close connection.");
 		}
 	}
 	
+
 	private void manageBattle() throws IOException {
 
 		System.out.println("is " + role + " turn: " + isPlayersTurn);
@@ -847,6 +853,15 @@ public class PlayerBot {
 
 			System.out.println("received: " + line);
 			String[] responseList = line.split(" "); // split line based on whitespace
+
+			if (line.equals("null")) {
+				closeConnection();
+
+				String message = "Die Verbindung mit dem anderen Spieler ist unterbrochen worden.";
+				JOptionPane.showMessageDialog(new JFrame(), message, "Fehler", JOptionPane.ERROR_MESSAGE);
+
+				break;
+			}
 
 			// if save game message is received
 			if (responseList[0].equals("save")) {
@@ -928,7 +943,7 @@ public class PlayerBot {
 					spawnEnemyField();
 					JOptionPane.showMessageDialog(mainFrame, "Du hast verloren :(");
 					break;
-					
+
 				} else if (isPlayersTurn) // if player did not lose and is its turn, attack
 				{
 					attack();
@@ -983,7 +998,7 @@ public class PlayerBot {
 					spawnEnemyField();
 					JOptionPane.showMessageDialog(this.mainFrame, "Du hast gewonnen! :)");
 					break;
-					
+
 				} else if (isPlayersTurn) // if player did not win and is its turn, continue attack
 				{
 					attack();
@@ -1015,7 +1030,7 @@ public class PlayerBot {
 		manageBattle();
 
 		closeConnection();
-		//System.exit(0);
+		// System.exit(0);
 
 	}
 

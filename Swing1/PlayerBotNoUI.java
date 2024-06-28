@@ -588,6 +588,8 @@ public class PlayerBotNoUI {
 			return false;
 		}
 	}
+	
+	
 
 	private void manageBattle() throws IOException {
 		// Netzwerknachrichten lesen und verarbeiten.
