@@ -67,7 +67,7 @@ class SpielFinden {
 			    protected Void doInBackground() throws Exception
 			    {
 			    	// go to SchiffeAufstellen, start with Client role
-			        new SchiffeAufstellen(menuFrame, false);
+			        new SchiffeAufstellen(menuFrame, false, selectedIp);
 					return null;
 			    }
 			}

@@ -66,6 +66,7 @@ public class SchiffeAufstellen {
 	final int shipValueForPreviews = -1;
 	private JPanel rotateButtonPanel = new JPanel();
 	private JButton rotateButton = new JButton();
+	private String ipServer = "localhost";
 
 	public SchiffeAufstellen(JFrame menuFrame, boolean playAgainstComputer, int fieldSize, int anzahlSchiffeGroesse5,
 			int anzahlSchiffeGroesse4, int anzahlSchiffeGroesse3, int anzahlSchiffeGroesse2) {
@@ -86,7 +87,7 @@ public class SchiffeAufstellen {
 
 	}
 
-	public SchiffeAufstellen(JFrame menuFrame, boolean playAgainstComputer) {
+	public SchiffeAufstellen(JFrame menuFrame, boolean playAgainstComputer, String ipServer) {
 		/*
 		 * Constructor for Client role
 		 */
@@ -94,6 +95,7 @@ public class SchiffeAufstellen {
 		this.role = "Client";
 		this.menuFrame = menuFrame;
 		this.playAgainstComputer = playAgainstComputer;
+		this.ipServer = ipServer;
 
 		manageSocketConnection();
 
@@ -111,7 +113,7 @@ public class SchiffeAufstellen {
 
 		while (!isConnectionSuccesfull) {
 			try {
-				Socket s = new Socket("localhost", port);
+				Socket s = new Socket(this.ipServer, port);
 				this.s = s;
 
 				// Ein- und Ausgabestrom des Sockets ermitteln
